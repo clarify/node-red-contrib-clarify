@@ -1,5 +1,6 @@
 # node-red-contrib-clarify
 Node-Red Nodes for adding data to Clarify
+Learn more about Clarify at: https://www.searis.no/clarify
 
 Available nodes are:
 * clarify-add-data: A node to add time series data to the Clarify database

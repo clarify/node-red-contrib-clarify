@@ -62,8 +62,10 @@
             $('#node-input-dataType').on('change', function (event) {
                 if (event.currentTarget.value === "integration.EnsureEnumSignal") {
                     $('#enum-values-container').show()
+                    $('#engUnit-container').hide()
                 } else {
                     $('#enum-values-container').hide()
+                    $('#engUnit-container').show()
                 }
             })
             $('#node-input-enumValues').typedInput({
@@ -168,15 +170,15 @@
             <option value="integration.EnsureEnumSignal">Enum</option>
          </select>
     </div>
-    <div class="form-row" id="enum-values-container">
-        <label for="node-input-enumValues">Enum Values</label>
-        <input type="text" id="node-input-enumValues">
-    </div>
     <div class="form-row">
         <label for="node-input-signalName">Name</label>
         <input type="text" id="node-input-signalName">
     </div>
-    <div class="form-row">
+    <div class="form-row" id="enum-values-container">
+        <label for="node-input-enumValues">Enum Values</label>
+        <input type="text" id="node-input-enumValues">
+    </div>
+    <div class="form-row" id="engUnit-container">
         <label for="node-input-signalEngUnit">Engineering Unit</label>
         <input type="text" id="node-input-signalEngUnit">
     </div>

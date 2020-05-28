@@ -169,7 +169,7 @@ module.exports = function (RED) {
                 },
                 "enumValues": signalEnumValues,
                 "engUnit": signalEngUnit,
-                "location": signalLocations,
+                "location": signalLocations || [],
             };
 
 
