@@ -1,0 +1,47 @@
+{
+  "name": "@searis/node-red-contrib-clarify",
+  "version": "0.0.7",
+  "description": "A Node-Red node to insert data into Clarify",
+  "repository": "git://github.com/searis/node-red-contrib-clarify.git",
+  "directories": {
+    "nodes": "./nodes",
+    "examples": "./examples"
+  },
+  "author": {
+    "name": "Searis AS",
+    "email": "teknisk@searis.no",
+    "url": "https://searis.no"
+  },
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "keywords": [
+    "clarify",
+    "time-series",
+    "iiot",
+    "node-red"
+  ],
+  "node-red": {
+    "nodes": {
+      "clarify-add-data": "nodes/clarify-add-data.js",
+      "clarify-api": "nodes/clarify-api.js",
+      "clarify-ensure-signal": "nodes/clarify-ensure-signal.js",
+      "clarify-inject-enums": "nodes/clarify-inject-enums.js",
+      "clarify-inject-labels": "nodes/clarify-inject-labels.js",
+      "clarify-inject-locations": "nodes/clarify-inject-locations.js"
+    }
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "jwt-decode": "^2.2.0",
+    "lodash": "^4.17.15",
+    "moment": "^2.25.3",
+    "object-hash": "^2.0.3",
+    "uuid": "^8.0.0",
+    "qs": "^6.8.0"
+  }
+}

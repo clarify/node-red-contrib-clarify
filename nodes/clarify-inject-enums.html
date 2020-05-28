@@ -1,0 +1,176 @@
+<script type="text/html" data-template-name="inject-enums">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+      <div class="form-row">
+        <label for="node-input-active"><i class="icon-tag"></i> Active</label>
+        <input type="checkbox" id="node-input-active" value="1">
+    </div>
+    <div class="form-row node-input-destination-row">
+        <label for="node-input-destination"><i class="icon-tag"></i> Inject as</label>
+        <input type="text" id="node-input-destination" placeholder="Destination">
+    </div>
+    <div class="form-row node-input-enums-container-row">
+        <ol id="node-input-enums-container"></ol>
+    </div>
+</script>
+
+<script type="text/javascript">
+    (function () {
+        $.fn.pressEnter = function (fn) {
+            return this.each(function () {
+                $(this).bind('enterPress', fn);
+                $(this).on('keydown', function (e) {
+                    if (e.keyCode == 13) {
+                        $(this).trigger("enterPress");
+                    }
+                })
+            });
+        };
+
+        function nextKey(enums) {
+            let next = 0;
+            for (var i = 0; i < enums.length; i++) {
+                if (enums[i].key > next) {
+                    next = enums[i].key;
+                }
+            }
+            next++;
+            return next;
+        };
+
+        RED.nodes.registerType("inject-enums", {
+            category: "Clarify",
+            color: "#00FF75",
+            defaults: {
+                name: { value: "" },
+                active: { value: true },
+                enums: { value: [{ key: 0, value: "" }] },
+                destination: {
+                    value: "enums",
+                    required: true
+                },
+                destinationType: { value: "msg" },
+
+            },
+            inputs: 1,
+            outputs: 1,
+            icon: "clarify.png",
+            label: function () {
+                return this.name || "inject enums";
+            },
+            oneditprepare: function () {
+                var node = this;
+
+
+                $('#node-input-destination').typedInput({
+                    default: 'msg',
+                    types: ['msg']
+                });
+
+                $("#node-input-enums-container")
+                    .css('min-height', '150px')
+                    .css('min-width', '450px')
+                    .editableList({
+                        sort: function (a, b) {
+                            return a.key - b.key
+                        },
+                        addItem: function (container, index, data) {
+                            let enumValue = data;
+
+                            let next = -32768
+                            $("#node-input-enums-container").editableList('items').each(function (i) {
+                                var enumkey = $(this).find('.node-input-enums-key')
+                                if (enumkey.val() != undefined && enumkey.val() > next) {
+                                    next = Number(enumkey.val())
+                                }
+                            })
+                            next += 1
+
+                            //increment value from previous value...
+                            if (!enumValue.hasOwnProperty('key')) {
+                                enumValue.key = next;
+                                enumValue.value = ""
+                            }
+
+                            var row = $('<div/>')
+                                .css({ overflow: 'hidden', whiteSpace: 'nowrap' })
+                                .appendTo(container);
+
+                            var enumKeyField = $('<input/>', { class: 'node-input-enums-key', type: 'number' })
+                                .css({ width: '10%' })
+                                .appendTo(row);
+                            enumKeyField.val(enumValue.key);
+
+                            var span = $('<span/>', { style: "margin-top: 6px;" }).appendTo(row);
+                            span.append(' &#8594;');
+                            var enumValueField = $('<input/>', { class: "node-input-enums-value", type: "text" })
+                                .css({ width: '60%' })
+                                .appendTo(row)
+                                .pressEnter(() => {
+                                    $("#node-input-enums-container").editableList('addItem', {})
+                                })
+                                .focus();
+                            enumValueField.val(enumValue.value);
+
+                        },
+                        removable: true,
+                        sortable: true,
+                    });
+                if (this.enums) {
+                    for (var i in this.enums) {
+                        $("#node-input-enums-container").editableList('addItem', { key: this.enums[i].key, value: this.enums[i].value })
+                    }
+                }
+            },
+            oneditsave: function () {
+                this.destinationType = $("#node-input-destination").typedInput('type');
+                var enums = $("#node-input-enums-container").editableList('items');
+                enums.sort()
+                var node = this;
+                node.enums = [];
+                enums.each(function (i) {
+                    var enumkey = $(this).find('.node-input-enums-key').val().trim();
+                    var enumval = $(this).find('.node-input-enums-value').val().trim();
+                    node.enums.push({ key: enumkey, value: enumval })
+                });
+            },
+            oneditresize: function (size) {
+                var rows = $("#dialog-form>div:not(.node-input-enums-container-row)");
+                var height = size.height;
+                for (var i = 0; i < rows.length; i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-input-enums-container-row");
+                height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
+                $("#node-input-enums-container").editableList('height', height);
+            },
+        });
+    })();
+</script>
+
+<script type="text/html" data-help-name="inject-enums">
+    <p>Helper node to assist in creating enum values for Clarify signals and items.</p>
+    <p>Injects the enum values onto the incoming msg-object and passes the msg-object on.</p>
+
+    <h3>Details</h3>
+        <p>E.g. use this node before Ensure Signal to manually setup enum values.</p>
+
+    <h3>General Properties</h3>
+    <dl class="message-properties">
+        <dt>Inject As <span class="property-type">string</span></dt>
+        <dd>Attribute name to inject as</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">msg</span></dt>
+        <dd>msg object with injected enum values</dd>
+    </dl>
+    
+    <h3>References</h3>
+        <p>
+            <a href="#">Clarify Documentation</a>
+        </p>
+    </script>
