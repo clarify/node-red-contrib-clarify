@@ -1,6 +1,6 @@
 {
   "name": "@searis/node-red-contrib-clarify",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A Node-Red node to insert data into Clarify",
   "repository": "git://github.com/searis/node-red-contrib-clarify.git",
   "directories": {
@@ -30,6 +30,7 @@
       "clarify-add-data": "nodes/clarify-add-data.js",
       "clarify-api": "nodes/clarify-api.js",
       "clarify-ensure-signal": "nodes/clarify-ensure-signal.js",
+      "clarify-ensure-multiple": "nodes/clarify-ensure-multiple.js",
       "clarify-inject-enums": "nodes/clarify-inject-enums.js",
       "clarify-inject-labels": "nodes/clarify-inject-labels.js",
       "clarify-inject-locations": "nodes/clarify-inject-locations.js"
