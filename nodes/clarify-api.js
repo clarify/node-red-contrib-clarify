@@ -188,6 +188,7 @@ module.exports = function (RED) {
             headers: {
                 'Authorization': "Bearer " + accessToken,
                 'contentType': "application/json",
+                'X-API-Version': 'next'
             },
             data: data
         }).catch(error => {
@@ -225,6 +226,7 @@ module.exports = function (RED) {
                 headers: {
                     'Authorization': "Bearer " + token,
                     'contentType': "application/json",
+                    'X-API-Version': '0.5'
                 },
                 data: req
             }).catch(error => {
@@ -293,10 +295,21 @@ module.exports = function (RED) {
         var node = this;
 
         var req = node.getAccessToken().then(token => {
+            var method = ""
+            switch (type) {
+                case "numeric":
+                    method = "input.AddFloats";
+                    break;
+                case "enum":
+                    method = "input.AddEnums";
+                    break;
+                default:
+                    throw (`Unknown dataType: ${type}`)
+            }
             var payload = {
                 jsonrpc: "2.0",
                 id: 1,
-                method: type,
+                method: method,
                 params: {
                     "id": signalID,
                     "data": data
@@ -310,6 +323,7 @@ module.exports = function (RED) {
                 headers: {
                     'Authorization': "Bearer " + token,
                     'contentType': "application/json",
+                    'X-API-Version': '0.5'
                 },
                 data: payload
             }).catch(error => {

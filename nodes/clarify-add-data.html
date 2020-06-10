@@ -3,24 +3,21 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row">
-      <label for="node-input-active"><i class="icon-tag"></i> Active</label>
-      <input type="checkbox" id="node-input-active" value="1">
+  <div class="form-row">
+    <label for="node-input-apiRef"><i class="icon-tag"></i> API</label>
+    <input type="text" id="node-input-apiRef" placeholder="API Endpoint">
   </div>
   <div class="form-row">
-      <label for="node-input-dataType">Data type</label>
-      <select type="text" id="node-input-dataType">
-          <option value="input.AddFloats">Float</option>
-          <option value="input.AddEnums">Enum</option>
-       </select>
-  </div>
-  <div class="form-row">
-      <label for="node-input-apiRef"><i class="icon-tag"></i> API</label>
-      <input type="text" id="node-input-apiRef" placeholder="API Endpoint">
-  </div>
-  <div class="form-row">
-    <label for="node-input-signalID"><i class="fa fa-key"></i> ID</label>
+    <label for="node-input-signalID">Signal ID</label>
     <input type="text" id="node-input-signalID" style="width:70%">
+  </div>
+  <div class="form-row">
+    <label for="node-input-dataType">Data Type</label>
+    <input type="text" id="node-input-dataType" style="width:70%"> 
+  </div>
+  <div class="form-row">
+    <label for="node-input-data">Data</label>
+    <input type="text" id="node-input-data" style="width:70%"> 
   </div>
 </script>
 <style>
@@ -39,8 +36,15 @@
         color: "#00FF75",
         defaults: {
             name: { value: "" },
-            active: { value: true },
-            dataType: { value: "input.AddFloats", required: true },
+            data: {
+                value: "payload.data",
+                required: true,
+            },
+            dataType: {
+                value: "dataType",
+                validate: RED.validators.typedInput('dataTypeType')
+            },
+            dataTypeType: { value: "msg" },
             signalID: {
                 value: "signalID",
                 required: true,
@@ -65,9 +69,30 @@
                     validate: /^[0-9a-v]{20}_[a-z0-9_]{1,40}$/
                 }]
             });
+            $('#node-input-data').typedInput({
+                default: 'msg',
+                types: ['msg']
+            });
+            $('#node-input-dataType').typedInput({
+                default: this.dataTypeType || 'msg',
+                types: ['msg', {
+                    hasValue: false,
+                    value: "numeric",
+                    label: "numeric",
+                    icon: "red/images/typedInput/09.svg"
+                },
+                    {
+                        hasValue: false,
+                        value: "enum",
+                        label: "enum",
+                        icon: "red/images/typedInput/bin.svg"
+                    }
+                ]
+            });
         },
         oneditsave: function () {
             this.signalIDType = $("#node-input-signalID").typedInput('type');
+            this.dataTypeType = $("#node-input-dataType").typedInput('type');
         }
     });
 </script>
@@ -88,13 +113,13 @@
 
     <h3>Inputs</h3>
         <dl class="message-properties">
-            <dt>ID <span class="property-type">msg | string</span></dt>
+            <dt>Signal ID <span class="property-type">msg | string</span></dt>
             <dd>Signal ID</dd>
 
-            <dt>dataType <span class="property-type">msg</span></dt>
-            <dd>If connected to a ensure signal node the data type in both nodes needs to match</dd>
+            <dt>dataType <span class="property-type">msg | numeric | enum</span></dt>
+            <dd>The datatype can either be set via the incoming msg or a static type.</dd>
 
-            <dt>payload <span class="property-type">msg</span></dt>
+            <dt>Data <span class="property-type">msg</span></dt>
             <dd>Data to add</dd>
             <dd>Expects: [Date,number][]</dd>
             <dd>Note: ISO8601 formatted date.</dd>
