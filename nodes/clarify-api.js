@@ -26,6 +26,7 @@ module.exports = function (RED) {
                 let urlElements = url.parse(node.apiUrl)
                 //todo: remove when login.dev.clfy.io is set as ISS on dev environment
                 let tokenUrl = urlElements.host === "dev.clfy.io" ? "searis.auth0.com" : "login.clarify.searis.no"
+                let audience = urlElements.host === "dev.clfy.io" ? `${urlElements.protocol}//${urlElements.host}/` : `${urlElements.protocol}//${urlElements.host}/api/`
 
                 var options = {
                     method: 'POST',
@@ -35,7 +36,7 @@ module.exports = function (RED) {
                         grant_type: 'client_credentials',
                         client_id: node.credentials.clientID,
                         client_secret: node.credentials.clientSecret,
-                        audience: `${urlElements.protocol}//${urlElements.host}/`
+                        audience: audience,
                     })
                 };
                 axios(options).then(response => {
