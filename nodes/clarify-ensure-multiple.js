@@ -56,7 +56,7 @@ module.exports = function (RED) {
 
         async function createSignalItem(data) {
             var method = "integration.EnsureFloat64Signal";
-            if (data.dataType === "enum") {
+            if (data.item.type === "enum") {
                 method = "integration.EnsureEnumSignal";
             }
 
