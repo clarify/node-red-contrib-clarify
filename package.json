@@ -31,12 +31,15 @@
       "clarify-api": "nodes/clarify-api.js",
       "clarify-ensure-signal": "nodes/clarify-ensure-signal.js",
       "clarify-ensure-multiple": "nodes/clarify-ensure-multiple.js",
+      "clarify-read-timeseries": "nodes/clarify-read-timeseries.js",
+      "clarify-rollup-timeseries": "nodes/clarify-rollup-timeseries.js",
       "clarify-inject-enums": "nodes/clarify-inject-enums.js",
       "clarify-inject-labels": "nodes/clarify-inject-labels.js",
       "clarify-inject-locations": "nodes/clarify-inject-locations.js"
     }
   },
   "dependencies": {
+    "json-rpc-2.0": "^0.2.10",
     "axios": "^0.21.1",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.15",

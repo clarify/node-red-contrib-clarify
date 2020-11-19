@@ -1,3 +1,5 @@
+
+
 module.exports = function (RED) {
     var qs = require('qs');
     const axios = require('axios').default;
@@ -318,6 +320,52 @@ module.exports = function (RED) {
             };
 
             let url = ` ${node.apiUrl}/input/rpc`
+            return axios({
+                method: "POST",
+                url: url,
+                headers: {
+                    'Authorization': "Bearer " + token,
+                    'contentType': "application/json",
+                    'X-API-Version': '0.5'
+                },
+                data: payload
+            }).catch(error => {
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    throw (error.response)
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                    // http.ClientRequest in node.js
+                    throw (error.request)
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    throw (error.message)
+                }
+            });
+        });
+
+        return req.then(response => {
+            if (response.data.error) {
+                throw (response)
+            }
+            return response;
+        })
+    };
+
+    ClarifyApiNode.prototype.getData = async function (method, params) {
+        var node = this;
+
+        var req = node.getAccessToken().then(token => {
+            var payload = {
+                jsonrpc: "2.0",
+                id: 1,
+                method: method,
+                params: params,
+            };
+
+            let url = ` ${node.apiUrl}/timeseries/rpc`
             return axios({
                 method: "POST",
                 url: url,

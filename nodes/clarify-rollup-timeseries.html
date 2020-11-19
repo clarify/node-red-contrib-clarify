@@ -1,0 +1,95 @@
+<script type="text/javascript">
+        RED.nodes.registerType("rollup-timeseries", {
+            category: "Clarify",
+            color: "#00FF75",
+            defaults: {
+                name: { value: "" },
+                apiRef: { value: null, type: "clarify-api" },
+                itemID: {
+                    value: "itemID",
+                    required: false,
+                    validate: RED.validators.typedInput('itemIDType')
+                },
+                itemIDType: { value: "msg" },
+                method: {
+                    value: "timeseries.Floats",
+                    required: true
+                },
+                from: {
+                    value: "from",
+                    required: false,
+                    validate: RED.validators.typedInput('fromType')
+                },
+                fromType: { value: "msg" },
+                to: {
+                    value: "to",
+                    required: false,
+                    validate: RED.validators.typedInput('toType')
+                },
+                toType: { value: "msg" },
+            },
+            inputs: 1,
+            outputs: 1,
+            icon: "clarify.png",
+            label: function () {
+                return this.name || "rollup timeseries";
+            },
+            oneditprepare: function () {
+                $('#node-input-itemID').typedInput({
+                    default: this.itemIDType || 'msg',
+                    types: ['msg', 'str']
+                });
+                $('#node-input-from').typedInput({
+                    default: this.fromType || 'msg',
+                    types: ['msg', 'str']
+                });
+                $('#node-input-to').typedInput({
+                    default: this.toType || 'msg',
+                    types: ['msg', 'str']
+                });
+            },
+            oneditsave: function () {
+                this.itemIDType = $("#node-input-itemID").typedInput('type');
+                this.fromType = $("#node-input-from").typedInput('type');
+                this.toType = $("#node-input-to").typedInput('type');
+            }
+        });
+</script>
+
+<script type="text/html" data-template-name="rollup-timeseries">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i>Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-apiRef">API</label>
+        <input type="text" id="node-input-apiRef" placeholder="API Endpoint">
+    </div>
+    <hr align="middle">
+    <div class="form-row">
+        <label for="node-input-itemID">Item ID</label>
+        <input type="text" id="node-input-itemID" style="width:70%">
+    </div>
+    <div class="form-row">
+        <label for="node-input-method">Method</label>
+        <select type="text" id="node-input-method">
+            <option value="timeseries.Floats">timeseries.Floats</option>
+            <option value="timeseries.Enums">timeseries.Enums</option>
+         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-from">From</label>
+        <input type="text" id="node-input-from" style="width:70%">
+    </div>
+    <div class="form-row">
+        <label for="node-input-to">To</label>
+        <input type="text" id="node-input-to" style="width:70%">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="rollup-timeseries">
+    <p>Rollup timeseries data for one signal</p>
+
+    <h3>Details</h3>
+    <p>Use this node to rollup timeseries data.</p>
+</script>
