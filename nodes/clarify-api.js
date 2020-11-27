@@ -5,23 +5,71 @@ module.exports = function (RED) {
   var jwtDecode = require('jwt-decode');
   var moment = require('moment');
 
-  function ClarifyApiNode(config) {
-    RED.nodes.createNode(this, config);
-    this.apiUrl = config.apiUrl;
-    this.integrationID = config.integrationID;
-    this.integrationName = config.integrationName;
-    this.organizationID = config.organizationID;
+    const low = require('lowdb')
+    const FileSync = require('lowdb/adapters/FileSync')
 
-    var nodeContext = this.context();
+    const adapter = new FileSync(RED.settings.userDir + '/clarify_db.json')
+    const db = low(adapter)
 
-    this.getAccessToken = async function () {
-      var node = this;
+    function ClarifyApiNode(config) {
+        RED.nodes.createNode(this, config);
+        this.apiUrl = config.apiUrl;
+        this.integrationID = config.integrationID;
+        this.integrationName = config.integrationName;
+        this.organizationID = config.organizationID;
+        this.db = db;
+        var nodeContext = this.context();
 
-      return new Promise(function (resolve, reject) {
-        let accessToken = nodeContext.get('accessToken');
-        if (accessToken && valid(accessToken)) {
-          resolve(accessToken);
-          return;
+        db.defaults({
+            signals: [],
+            nodes: []
+        }).write()
+
+        this.getAccessToken = async function () {
+            var node = this;
+
+            return new Promise(function (resolve, reject) {
+                let accessToken = nodeContext.get("accessToken")
+                if (accessToken && valid(accessToken)) {
+                    resolve(accessToken);
+                    return
+                }
+                let url = new URL(node.apiUrl)
+                //todo: remove when login.dev.clfy.io is set as ISS on dev environment
+                let tokenUrl = url.host === "dev.clfy.io" ? "searis.auth0.com" : "login.clarify.searis.no"
+                let audience = url.host === "dev.clfy.io" ? `${url.protocol}//${url.host}/` : `${url.protocol}//${url.host}/api/`
+
+                var options = {
+                    method: 'POST',
+                    url: `https://${tokenUrl}/oauth/token`,
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    data: qs.stringify({
+                        grant_type: 'client_credentials',
+                        client_id: node.credentials.clientID,
+                        client_secret: node.credentials.clientSecret,
+                        audience: audience,
+                    })
+                };
+                axios(options).then(response => {
+                    nodeContext.set("accessToken", response.data.access_token)
+                    resolve(response.data.access_token);
+                }).catch(error => {
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        reject(error.response)
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                        // http.ClientRequest in node.js
+                        reject(error.request)
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        reject(error.message)
+                    }
+                });
+
+            })
         }
         let urlElements = url.parse(node.apiUrl);
         //todo: remove when login.dev.clfy.io is set as ISS on dev environment
