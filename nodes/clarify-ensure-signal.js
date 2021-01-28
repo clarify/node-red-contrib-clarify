@@ -291,13 +291,5 @@ module.exports = function (RED) {
             res.json();
         }
     });
-
-    RED.nodes.registerType("ensure-signal", ClarifyEnsureSignalNode, {
-        settings: {
-            sampleNodeColour: {
-                value: "red",
-                exportable: true
-            }
-        }
-    });
+    RED.nodes.registerType("ensure-signal", ClarifyEnsureSignalNode);
 };
