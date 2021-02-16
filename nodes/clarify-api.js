@@ -25,7 +25,19 @@ module.exports = function (RED) {
         }
         let urlElements = url.parse(node.apiUrl);
         //todo: remove when login.dev.clfy.io is set as ISS on dev environment
-        let tokenUrl = urlElements.host === 'dev.clfy.io' ? 'searis.auth0.com' : 'login.clarify.searis.no';
+        let tokenUrl;
+        switch (urlElements.host) {
+          case 'dev.clfy.io': // dev-legacy
+            tokenUrl = 'searis.auth0.com';
+            break;
+          case 'clarify.searis.no': // prod-legacy
+            tokenUrl = 'login.clarify.searis.no';
+            break;
+          case 'clarify.clfy.io': // dev
+            tokenUrl = 'login.clarify.clfy.io';
+            break;
+        }
+
         let audience =
           urlElements.host === 'dev.clfy.io'
             ? `${urlElements.protocol}//${urlElements.host}/`
