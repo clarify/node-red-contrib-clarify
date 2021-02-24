@@ -1,176 +1,176 @@
 <script type="text/html" data-template-name="inject-locations">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-      <div class="form-row">
-        <label for="node-input-active"><i class="icon-tag"></i> Active</label>
-        <input type="checkbox" id="node-input-active" value="1">
-    </div>
-    <div class="form-row node-input-destination-row">
-        <label for="node-input-destination"><i class="icon-tag"></i> Inject as</label>
-        <input type="text" id="node-input-destination" placeholder="Destination">
-    </div>
-    <div class="form-row node-input-locations-container-row">
-        <ol id="node-input-locations-container"></ol>
-    </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-active"><i class="icon-tag"></i> Active</label>
+    <input type="checkbox" id="node-input-active" value="1" />
+  </div>
+  <div class="form-row node-input-destination-row">
+    <label for="node-input-destination"><i class="icon-tag"></i> Inject as</label>
+    <input type="text" id="node-input-destination" placeholder="Destination" />
+  </div>
+  <div class="form-row node-input-locations-container-row">
+    <ol id="node-input-locations-container"></ol>
+  </div>
 </script>
 
 <script type="text/javascript">
-    (function () {
-        $.fn.pressEnter = function (fn) {
-            return this.each(function () {
-                $(this).bind('enterPress', fn);
-                $(this).on('keydown', function (e) {
-                    if (e.keyCode == 13) {
-                        $(this).trigger("enterPress");
-                    }
-                })
-            });
-        };
-
-        function nextKey(locations) {
-            let next = 0;
-            for (var i = 0; i < locations.length; i++) {
-                if (locations[i].key > next) {
-                    next = locations[i].key;
-                }
-            }
-            next++;
-            return next;
-        };
-
-        RED.nodes.registerType("inject-locations", {
-            category: "Clarify",
-            color: "#00FF75",
-            defaults: {
-                name: { value: "" },
-                active: { value: true },
-                locations: { value: [{ key: 0, value: "" }] },
-                destination: {
-                    value: "signalLocations",
-                    required: true
-                },
-                destinationType: { value: "msg" },
-
-            },
-            inputs: 1,
-            outputs: 1,
-            icon: "clarify.png",
-            label: function () {
-                return this.name || "inject locations";
-            },
-            oneditprepare: function () {
-                var node = this;
-
-
-                $('#node-input-destination').typedInput({
-                    default: 'msg',
-                    types: ['msg']
-                });
-
-                $("#node-input-locations-container")
-                    .css('min-height', '150px')
-                    .css('min-width', '450px')
-                    .editableList({
-                        sort: function (a, b) {
-                            return a.key - b.key
-                        },
-                        addItem: function (container, index, data) {
-                            let enumValue = data;
-
-                            let next = -32768
-                            $("#node-input-locations-container").editableList('items').each(function (i) {
-                                var enumkey = $(this).find('.node-input-locations-key')
-                                if (enumkey.val() != undefined && enumkey.val() > next) {
-                                    next = Number(enumkey.val())
-                                }
-                            })
-                            next += 1
-
-                            //increment value from previous value...
-                            if (!enumValue.hasOwnProperty('key')) {
-                                enumValue.key = next;
-                                enumValue.value = ""
-                            }
-
-                            var row = $('<div/>')
-                                .css({ overflow: 'hidden', whiteSpace: 'nowrap' })
-                                .appendTo(container);
-
-                            var enumKeyField = $('<input/>', { class: 'node-input-locations-key', type: 'number' })
-                                .css({ width: '10%' })
-                                .appendTo(row);
-                            enumKeyField.val(enumValue.key);
-
-                            var span = $('<span/>', { style: "margin-top: 6px;" }).appendTo(row);
-                            span.append(' &#8594;');
-                            var enumValueField = $('<input/>', { class: "node-input-locations-value", type: "text" })
-                                .css({ width: '60%' })
-                                .appendTo(row)
-                                .pressEnter(() => {
-                                    $("#node-input-locations-container").editableList('addItem', {})
-                                })
-                                .focus();
-                            enumValueField.val(enumValue.value);
-
-                        },
-                        removable: true,
-                        sortable: true,
-                    });
-                if (this.locations) {
-                    for (var i in this.locations) {
-                        $("#node-input-locations-container").editableList('addItem', { key: this.locations[i].key, value: this.locations[i].value })
-                    }
-                }
-            },
-            oneditsave: function () {
-                this.destinationType = $("#node-input-destination").typedInput('type');
-                var locations = $("#node-input-locations-container").editableList('items');
-                locations.sort()
-                var node = this;
-                node.locations = [];
-                locations.each(function (i) {
-                    var enumkey = $(this).find('.node-input-locations-key').val().trim();
-                    var enumval = $(this).find('.node-input-locations-value').val().trim();
-                    node.locations.push({ key: enumkey, value: enumval })
-                });
-            },
-            oneditresize: function (size) {
-                var rows = $("#dialog-form>div:not(.node-input-locations-container-row)");
-                var height = size.height;
-                for (var i = 0; i < rows.length; i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                var editorRow = $("#dialog-form>div.node-input-locations-container-row");
-                height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
-                $("#node-input-locations-container").editableList('height', height);
-            },
+  (function () {
+    $.fn.pressEnter = function (fn) {
+      return this.each(function () {
+        $(this).bind('enterPress', fn);
+        $(this).on('keydown', function (e) {
+          if (e.keyCode == 13) {
+            $(this).trigger('enterPress');
+          }
         });
-    })();
+      });
+    };
+
+    function nextKey(locations) {
+      let next = 0;
+      for (var i = 0; i < locations.length; i++) {
+        if (locations[i].key > next) {
+          next = locations[i].key;
+        }
+      }
+      next++;
+      return next;
+    }
+
+    RED.nodes.registerType('inject-locations', {
+      category: 'Clarify',
+      color: '#00FF75',
+      defaults: {
+        name: {value: ''},
+        active: {value: true},
+        locations: {value: [{key: 0, value: ''}]},
+        destination: {
+          value: 'signalLocations',
+          required: true,
+        },
+        destinationType: {value: 'msg'},
+      },
+      inputs: 1,
+      outputs: 1,
+      icon: 'clarify.png',
+      label: function () {
+        return this.name || 'inject locations';
+      },
+      oneditprepare: function () {
+        var node = this;
+
+        $('#node-input-destination').typedInput({
+          default: 'msg',
+          types: ['msg'],
+        });
+
+        $('#node-input-locations-container')
+          .css('min-height', '150px')
+          .css('min-width', '450px')
+          .editableList({
+            sort: function (a, b) {
+              return a.key - b.key;
+            },
+            addItem: function (container, index, data) {
+              let enumValue = data;
+
+              let next = -32768;
+              $('#node-input-locations-container')
+                .editableList('items')
+                .each(function (i) {
+                  var enumkey = $(this).find('.node-input-locations-key');
+                  if (enumkey.val() != undefined && enumkey.val() > next) {
+                    next = Number(enumkey.val());
+                  }
+                });
+              next += 1;
+
+              //increment value from previous value...
+              if (!enumValue.hasOwnProperty('key')) {
+                enumValue.key = next;
+                enumValue.value = '';
+              }
+
+              var row = $('<div/>').css({overflow: 'hidden', whiteSpace: 'nowrap'}).appendTo(container);
+
+              var enumKeyField = $('<input/>', {class: 'node-input-locations-key', type: 'number'})
+                .css({width: '10%'})
+                .appendTo(row);
+              enumKeyField.val(enumValue.key);
+
+              var span = $('<span/>', {style: 'margin-top: 6px;'}).appendTo(row);
+              span.append(' &#8594;');
+              var enumValueField = $('<input/>', {class: 'node-input-locations-value', type: 'text'})
+                .css({width: '60%'})
+                .appendTo(row)
+                .pressEnter(() => {
+                  $('#node-input-locations-container').editableList('addItem', {});
+                })
+                .focus();
+              enumValueField.val(enumValue.value);
+            },
+            removable: true,
+            sortable: true,
+          });
+        if (this.locations) {
+          for (var i in this.locations) {
+            $('#node-input-locations-container').editableList('addItem', {
+              key: this.locations[i].key,
+              value: this.locations[i].value,
+            });
+          }
+        }
+      },
+      oneditsave: function () {
+        this.destinationType = $('#node-input-destination').typedInput('type');
+        var locations = $('#node-input-locations-container').editableList('items');
+        locations.sort();
+        var node = this;
+        node.locations = [];
+        locations.each(function (i) {
+          var enumkey = $(this).find('.node-input-locations-key').val().trim();
+          var enumval = $(this).find('.node-input-locations-value').val().trim();
+          node.locations.push({key: enumkey, value: enumval});
+        });
+      },
+      oneditresize: function (size) {
+        var rows = $('#dialog-form>div:not(.node-input-locations-container-row)');
+        var height = size.height;
+        for (var i = 0; i < rows.length; i++) {
+          height -= $(rows[i]).outerHeight(true);
+        }
+        var editorRow = $('#dialog-form>div.node-input-locations-container-row');
+        height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
+        $('#node-input-locations-container').editableList('height', height);
+      },
+    });
+  })();
 </script>
 
 <script type="text/html" data-help-name="inject-locations">
-    <p>Helper node to assist in creating location values for Clarify signals and items.</p>
-    <p>Injects the location values onto the incoming msg-object and passes the msg-object on.</p>
+  <p>Helper node to assist in creating location values for Clarify signals and items.</p>
+  <p>Injects the location values onto the incoming msg-object and passes the msg-object on.</p>
 
-    <h3>Details</h3>
-        <p>E.g. use this node before Ensure Signal to manually setup location values.</p>
+  <h3>Details</h3>
+  <p>E.g. use this node before Ensure Signal to manually setup location values.</p>
 
-    <h3>General Properties</h3>
-    <dl class="message-properties">
-        <dt>Inject As <span class="property-type">string</span></dt>
-        <dd>Attribute name to inject as</dd>
-    </dl>
+  <h3>General Properties</h3>
+  <dl class="message-properties">
+    <dt>Inject As <span class="property-type">string</span></dt>
+    <dd>Attribute name to inject as</dd>
+  </dl>
 
-    <h3>Outputs</h3>
-    <dl class="message-properties">
-        <dt>msg <span class="property-type">msg</span></dt>
-        <dd>msg object with injected location values</dd>
-    </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>msg <span class="property-type">msg</span></dt>
+    <dd>msg object with injected location values</dd>
+  </dl>
 
-    <h3>References</h3>
-        <p>
-            <a href="#">Clarify Documentation</a>
-        </p>
-    </script>
+  <h3>References</h3>
+  <p>
+    <a href="#">Clarify Documentation</a>
+  </p>
+</script>
