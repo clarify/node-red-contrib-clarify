@@ -47,6 +47,7 @@ node_modules
 *_cred.json
 
 flows_*
+tmp
 
 local-userdir
 package-lock.json

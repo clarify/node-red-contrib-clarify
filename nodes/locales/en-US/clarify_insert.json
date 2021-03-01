@@ -1,0 +1,25 @@
+{
+    "clarify_insert": {
+        "label": {
+            "alwaysEnsure": "Always ensure",
+            "annotations": "Annotations",
+            "credentials": "Credentials",
+            "dataSeries": "Data series",
+            "dataTimes": "Data times",
+            "dataType": "Data type",
+            "description": "Description",
+            "engUnit": "Eng. unit",
+            "enumValues": "Enum values",
+            "gapDetection": "Gap detection",
+            "id": "ID",
+            "labels": "Labels",
+            "name": "Name",
+            "sampleInterval": "Sample interval",
+            "sourceType": "Source type"
+        },
+        "header": {
+            "advancedSettings": "Advanced settings",
+            "signalInfo": "Signal info"
+        }
+    }
+}

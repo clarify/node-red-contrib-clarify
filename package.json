@@ -1,49 +1,45 @@
 {
-  "name": "@searis/node-red-contrib-clarify",
-  "version": "0.0.12",
-  "description": "A Node-Red node to insert data into Clarify",
-  "repository": "git://github.com/searis/node-red-contrib-clarify.git",
-  "directories": {
-    "nodes": "./nodes",
-    "examples": "./examples"
-  },
-  "author": {
-    "name": "Searis AS",
-    "email": "teknisk@searis.no",
-    "url": "https://searis.no"
-  },
-  "license": "Apache-2.0",
-  "licenses": [
-    {
-      "type": "Apache-2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    "name": "@searis/node-red-contrib-clarify",
+    "version": "0.0.12",
+    "description": "A Node-Red node to insert data into Clarify",
+    "repository": "git://github.com/searis/node-red-contrib-clarify.git",
+    "directories": {
+        "nodes": "./nodes",
+        "examples": "./examples"
+    },
+    "author": {
+        "name": "Searis AS",
+        "email": "teknisk@searis.no",
+        "url": "https://searis.no"
+    },
+    "license": "Apache-2.0",
+    "licenses": [
+        {
+            "type": "Apache-2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        }
+    ],
+    "keywords": [
+        "clarify",
+        "time-series",
+        "iiot",
+        "node-red"
+    ],
+    "node-red": {
+        "nodes": {
+            "clarify_api": "nodes/clarify_api.js",
+            "clarify_insert": "nodes/clarify_insert.js"
+        }
+    },
+    "dependencies": {
+        "async-mutex": "^0.3.1",
+        "axios": "^0.21.1",
+        "jwt-decode": "^3.1.2",
+        "lodash": "^4.17.21",
+        "lowdb": "^1.0.0",
+        "moment": "^2.29.1",
+        "object-hash": "^2.1.1",
+        "qs": "^6.9.6",
+        "uuid": "^8.3.2"
     }
-  ],
-  "keywords": [
-    "clarify",
-    "time-series",
-    "iiot",
-    "node-red"
-  ],
-  "node-red": {
-    "nodes": {
-      "clarify-add-data": "nodes/clarify-add-data.js",
-      "clarify-api": "nodes/clarify-api.js",
-      "clarify-ensure-signal": "nodes/clarify-ensure-signal.js",
-      "clarify-ensure-multiple": "nodes/clarify-ensure-multiple.js",
-      "clarify-inject-enums": "nodes/clarify-inject-enums.js",
-      "clarify-inject-labels": "nodes/clarify-inject-labels.js",
-      "clarify-inject-locations": "nodes/clarify-inject-locations.js"
-    }
-  },
-  "dependencies": {
-    "axios": "^0.21.1",
-    "jwt-decode": "^3.1.2",
-    "lodash": "^4.17.15",
-    "moment": "^2.29.1",
-    "object-hash": "^2.1.1",
-    "qs": "^6.9.6",
-    "uuid": "^8.3.2",
-    "lowdb": "^1.0.0"
-  }
 }

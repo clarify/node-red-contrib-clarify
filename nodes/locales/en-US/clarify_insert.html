@@ -1,0 +1,124 @@
+<script type="text/html" data-help-name="clarify_insert">
+  <p>Write data to Clarify.</p>
+
+  <h3>Details</h3>
+  <p>Use this node to create signals and write data to Clarify.</p>
+  <p>Each incoming message must have a unique ID so that this module can differentiate beteween the signals.</p>
+
+  <h3>General Properties</h3>
+  <dl class="message-properties">
+    <dt>API <span class="property-type">config</span></dt>
+    <dd>API Configuration</dd>
+  </dl>
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>ID <span class="property-type">msg.payload.id</span></dt>
+    <dd>A unique id per signal that has to match the regex for Clarify ID's <code>/^[a-z0-9_-]{1,40}$/</code>. If the id is changed will a new signal be created.</dd>
+    <dd>Expects: string</dd>
+
+    <dt>Name <span class="property-type">msg.payload.name</span></dt>
+    <dd>The name used for the signal. Defaults to the signal ID.</dd>
+    <dd>Expects: string</dd>
+
+    <dt class="optional">Data type <span class="property-type">msg.payload.dataType</span></dt>
+    <dd>The data type for the signal. Must be set as msg.payload.dataType and be either numeric or enum. Defaults to numeric.</dd>
+    <dd>Expects: numeric | enum</dd>
+
+    <dt class="optional">Description <span class="property-type">msg.payload.description</span></dt>
+    <dd>Description of the signal. Defaults to empty.</dd>
+    <dd>Expects: string</dd>
+
+    <dt class="optional">annotations <span class="property-type">msg.payload.labels</span></dt>
+    <dd>Labels.</dd>
+    <dd>Expects: Map[string]string[].</dd>
+    <dd>Example: <code>{"equipment":["fan","engine"]}</code></dd>
+
+    <dt class="optional">Annotations <span class="property-type">msg.payload.annotations</span></dt>
+    <dd>Annotations</dd>
+    <dd>Expects: Map[string]string[].</dd>
+    <dd>Example: <code>{"version":["v1"]}</code></dd>
+
+    <dt class="optional">Engineering Unit <span class="property-type">msg.payload.engUnit</span></dt>
+    <dd>Engineering unit for the signal.</dd>
+    <dd>Expects: string.</dd>
+    <dd>Example: <code>bar</code></dd>
+
+    <dt class="optional">Enum values <span class="property-type">msg.payload.enumValues</span></dt>
+    <dd>Enum values for enum signals.</dd>
+    <dd>Expects: Map[number]string.</dd>
+    <dd>Example: <code>{0: "Open", 1: "Closed"}</code></dd>
+
+    <dt class="optional">Source type <span class="property-type">msg.payload.sourceType</span></dt>
+    <dd>The source type of the signal. Can be either measurement, aggregation or prediction. Defaults to measurement.</dd>
+    <dd>Expects: string.</dd>
+    <dd>Example: <code>measurement</code></dd>
+
+    <dt class="optional">Sample interval <span class="property-type">msg.payload.sampleInterval</span></dt>
+    <dd>The sample interval of the signal. Set the expected sample interval for the signal data in RFC 3339 period.</dd>
+    <dd>Expects: string as valid RFC 3339 period.</dd>
+    <dd>Example: <code>PT1S</code> (for 1 second)</dd>
+
+    <dt class="optional">Gap detection <span class="property-type">msg.payload.gapDetection</span></dt>
+    <dd>The gap detection of the signal. Set the expected gap detection time for the signal in RFC 3339 period. Common to set the gap detection 2-3 times larger than the expected sample interval.</dd>
+    <dd>Expects: string as valid RFC 3339 period.</dd>
+    <dd>Example: <code>PT3S</code> (for 3 second)</dd>
+
+    <dt>Data times<span class="property-type">msg.payload.data.times</span></dt>
+    <dd>Timestamps for the data. The length of the array must be equal to Data series</dd>
+    <dd>Expects: array</dd>
+    <dd>Example: <code>["2020-01-01T00:00:00Z",
+      "2020-01-01T00:01:00Z"]</code></dd>
+
+    <dt>Data series<span class="property-type">msg.payload.data.series</span></dt>
+    <dd>Values of the data. The length of the array must be equal to Data times</dd>
+    <dd>Expects: array</dd>
+    <dd>Example: <code>[1, 10]</code></dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+      TBA
+  </dl>
+
+  <h3>References</h3>
+  <p>
+      <a href="#">Clarify Documentation</a>
+  </p>
+
+  <h3>Example message</h3>
+  <p><pre>
+  {
+    "id": "id100",
+    "name": "Ice Cream Temperature",
+    "dataType": "numeric",
+    "description": "Temperature measurement of the ice cream",
+    "labels": {
+      "flavours": [
+        "sweet",
+        "sour"
+      ],
+      "location": [
+        "pier",
+        "banana stand"
+      ]
+    },
+    "engUnit": "°C",
+    "sourceType": "measurement",
+    "sampleInterval": "PT1M",
+    "gapDetection": "PT5M",
+    "data": {
+      "times": [
+        "2020-01-01T00:00:00Z",
+        "2020-01-01T00:01:00Z",
+        "2020-01-01T00:02:00Z"
+      ],
+      "values": [
+        1,
+        10,
+        35
+      ]
+    }
+  }
+  </pre></p>
+</script>
