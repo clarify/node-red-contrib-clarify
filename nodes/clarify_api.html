@@ -1,0 +1,240 @@
+<!-- <script type="text/javascript" src="tools.js"></script> -->
+<script type="text/javascript">
+  RED.nodes.registerType('clarify_api', {
+    category: 'config',
+
+    credentials: {
+      credentialsFile: {type: 'password'},
+      overrideApiUrl: {type: 'text'},
+      overrideTokenUrl: {type: 'text'},
+      overrideAudience: {type: 'text'},
+      overrideClientId: {type: 'text'},
+      overrideClientSecret: {type: 'password'},
+      overrideIntegrationId: {type: 'text'},
+    },
+    defaults: {
+      name: {
+        value: '',
+      },
+    },
+    label: function () {
+      return this.name ? this.name : 'Client Credentials';
+    },
+    oneditprepare: function () {
+      var parent = this;
+
+      $('#credentialsFileHidden').change(e => {
+        const file = e.target.files[0];
+        if (file === undefined) {
+          return;
+        }
+
+        if (file.type !== 'application/json') {
+          $('#credentialFileError').html('Accepts only JSON files.');
+          return;
+        }
+
+        if (file.size > 500) {
+          $('#credentialFileError').html('JSON file too large.');
+          return;
+        }
+
+        let reader = new FileReader();
+        reader.onerror = function (e) {
+          console.error(e);
+        };
+        reader.onload = function (e) {
+          obj = JSON.parse(e.target.result);
+          if (obj.apiURL === undefined || obj.apiURL === '') {
+            $('#credentialFileError').html('Missing apiURL');
+            return;
+          }
+          if (obj.integration === undefined || obj.integration === '') {
+            $('#credentialFileError').html('Missing integration (id)');
+            return;
+          }
+          if (obj.credentials === undefined || typeof obj.credentials !== 'object') {
+            $('#credentialFileError').html('Missing credentials object');
+            return;
+          }
+          if (obj.credentials.type === undefined || typeof obj.credentials.type === '') {
+            $('#credentialFileError').html('Missing credentials.type');
+            return;
+          }
+          if (obj.credentials.type !== 'client-credentials') {
+            $('#credentialFileError').html('Unsupported credentials type credentials.type');
+            return;
+          }
+          if (obj.credentials.clientId === undefined || typeof obj.credentials.clientId === '') {
+            $('#credentialFileError').html('Missing credentials.clientId');
+            return;
+          }
+          if (obj.credentials.clientSecret === undefined || typeof obj.credentials.clientSecret === '') {
+            $('#credentialFileError').html('Missing credentials.clientSecret');
+            return;
+          }
+          $('#node-config-input-credentialsFile').val(e.target.result).change();
+        };
+        data = reader.readAsText(file);
+      });
+
+      // chooseCredentialFileButton is a dummy button with correct styling that
+      // clicks the actual file input element that is hidden.
+      $('#chooseCredentialFileButton').click(() => {
+        $('#credentialsFileHidden').click();
+      });
+
+      $('#clearCredentialsFile').click(() => {
+        $('#credentialsFileHidden').val('');
+        $('#node-config-input-credentialsFile').val('').change();
+        $.getJSON('/clearCredentialsFile', {id: parent.id}).done(() => {
+          $('#tokenExpiration').change();
+        });
+      });
+
+      $('#node-config-input-credentialsFile').on('change', function (event) {
+        if (event.currentTarget.value === '') {
+          $('#credentialsFile-add').show();
+          $('#credentialsFile-clear').hide();
+        } else {
+          $('#credentialsFile-add').hide();
+          $('#credentialsFile-clear').show();
+        }
+      });
+
+      $('#tokenExpiration').on('change', function (event) {
+        $.getJSON('/tokenValid', {id: parent.id})
+          .done(function (data) {
+            $('#tokenError').html('');
+            if (data.valid) {
+              $('#tokenControl').html('Clear');
+              $('#tokenExpiration').html('Valid until ' + data.expiration);
+            } else {
+              $('#tokenControl').html('Check credentials');
+              $('#tokenExpiration').html('');
+            }
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var err = textStatus + ', ' + error;
+            console.error('Request Failed: ' + err);
+          });
+      });
+      $('#tokenExpiration').change();
+
+      $('#tokenControl').click(e => {
+        switch ($(e.target).text()) {
+          case 'Clear':
+            $.getJSON('/clearToken', {id: parent.id}).done(() => {
+              $('#tokenExpiration').change();
+            });
+            break;
+          case 'Check credentials':
+            $.getJSON('/getToken', {id: parent.id})
+              .done(data => {
+                if (!data.created) {
+                  $('#tokenError').html('Could not get token');
+                } else {
+                  $('#tokenExpiration').change();
+                }
+              })
+              .fail(function (jqxhr, textStatus, error) {
+                var err = textStatus + ', ' + error;
+                console.error('Request Failed: ' + err);
+              });
+            break;
+        }
+      });
+
+      $('#advanced-settings').hide();
+      $('#advanced-settings-header').click(() => {
+        if ($('#advanced-settings').is(':visible')) {
+          $('#advanced-settings-caret').addClass('fa-caret-right').removeClass('fa-caret-down');
+          $('#advanced-settings').hide();
+        } else {
+          $('#advanced-settings-caret').addClass('fa-caret-down').removeClass('fa-caret-right');
+          $('#advanced-settings').show();
+        }
+      });
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="clarify_api">
+  <div class="form-row">
+    <label for="node-config-input-name"><span data-i18n="clarify_api.label.name"></label>
+    <input type="text" id="node-config-input-name"  data-i18n="[placeholder]clarify_api.label.name" />
+  </div>
+  <div class="form-row">
+    <label for="credentialsFile"><span data-i18n="clarify_api.label.credentials"></label>
+    <input type="hidden" id="node-config-input-credentialsFile" />
+    <span id="credentialsFile-add">
+      <button type="button" id="chooseCredentialFileButton" class="red-ui-button">
+        <span data-i18n="clarify_api.label.chooseFile">
+      </button>
+      <span id="credentialFileError" style="color: #AD1625;"></span>
+      <div style="height: 0px;width:0px; overflow:hidden;">
+        <input type="file" class="red-ui-button" id="credentialsFileHidden" />
+      </div>
+    </span>
+    <span id="credentialsFile-clear">
+      <button type="button" id="clearCredentialsFile" class="red-ui-button">
+        <span data-i18n="clarify_api.label.clear">
+      </button>
+    </span>
+  </div>
+  <div class="form-row">
+    <label for="tokenControl">
+      <span data-i18n="clarify_api.label.accessToken">
+    </label>
+    <button type="button" id="tokenControl" class="red-ui-button">
+      <span data-i18n="clarify_api.label.clear">
+    </button>
+    <span id="tokenExpiration"></span>
+    <span id="tokenError" style="color: #AD1625;"></span>
+  </div>
+  <hr align="middle" />
+  <div class="form-row">
+    <h4 style="cursor: pointer;" id="advanced-settings-header">
+      <i class="fa fa-caret-right" id="advanced-settings-caret"></i>
+      <span data-i18n="clarify_api.header.advancedSettings">
+    </h4>
+  </div>
+  <span id="advanced-settings">
+    <div class="form-row">
+      <label for="node-config-input-apiUrl">
+        <span data-i18n="clarify_api.label.apiUrl">
+      </label>
+      <input type="text" id="node-config-input-overrideApiUrl" data-i18n="[placeholder]clarify_api.label.apiUrl" />
+    </div>
+    <div class="form-row">
+      <label for="node-config-input-tokenUrl">
+        <span data-i18n="clarify_api.label.tokenUrl">
+      </label>
+      <input type="text" id="node-config-input-overrideTokenUrl" data-i18n="[placeholder]clarify_api.label.tokenUrl" />
+    </div>
+    <div class="form-row">
+      <label for="node-config-input-audience">
+        <span data-i18n="clarify_api.label.audience">
+      </label>
+      <input type="text" id="node-config-input-overrideAudience" data-i18n="[placeholder]clarify_api.label.audience" />
+    </div>
+    <div class="form-row">
+      <label for="node-config-input-clientId">
+        <span data-i18n="clarify_api.label.clientId">
+      </label>
+      <input type="text" id="node-config-input-overrideClientId" data-i18n="[placeholder]clarify_api.label.clientId" />
+    </div>
+    <div class="form-row">
+      <label for="node-config-input-clientSecret">
+        <span data-i18n="clarify_api.label.clientSecret">
+      </label>
+      <input type="password" id="node-config-input-overrideClientSecret" data-i18n="[placeholder]clarify_api.label.clientSecret" />
+    </div>
+    <div class="form-row">
+      <label for="node-config-input-integration-id">
+        <span data-i18n="clarify_api.label.integrationId">
+      </label>
+      <input type="text" id="node-config-input-overrideIntegrationId" data-i18n="[placeholder]clarify_api.label.integrationId" />
+    </div>
+  </span>
+</script>

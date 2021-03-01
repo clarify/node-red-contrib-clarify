@@ -1,0 +1,20 @@
+{
+    "clarify_api": {
+        "label": {
+            "accessToken": "Access token",
+            "apiUrl": "API url",
+            "audience": "Audience",
+            "chooseFile": "Choose file",
+            "clear": "Clear",
+            "clientId": "Client id",
+            "clientSecret": "Client secret",
+            "credentials": "Credentials",
+            "integrationId": "Integration id",
+            "name": "Name",
+            "tokenUrl": "Token url"
+        },
+        "header": {
+            "advancedSettings": "Advanced settings"
+        }
+    }
+}
