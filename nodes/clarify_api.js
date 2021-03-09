@@ -60,10 +60,10 @@ module.exports = function (RED) {
         this.credentials.integrationId = this.credentials.overrideIntegrationId;
       }
 
-      let urlElements = url.parse(this.credentials.apiUrl);
+      let url = new URL(this.credentials.apiUrl)
 
       if (this.credentials.tokenUrl === undefined) {
-        switch (urlElements.host) {
+        switch (url.host) {
           case 'dev.clfy.io': // dev-legacy
             this.credentials.tokenUrl = 'https://searis.auth0.com/oauth/token';
             break;
@@ -287,13 +287,16 @@ module.exports = function (RED) {
       node
         .getAccessToken()
         .then(token => {
-          res.json({created: true, token: token});
+          res.json({ created: true, token: token });
         })
-        .catch(() => {
-          res.json({created: false});
+        .catch((err) => {
+          res.json({ created: false });
         });
     } else {
-      res.json({created: false});
+      res.json({
+        created: false,
+        msg: "Node not deployed"
+      });
     }
   });
 
@@ -301,6 +304,7 @@ module.exports = function (RED) {
     let out = {
       valid: false,
       expiration: null,
+      msg: undefined
     };
 
     let node = RED.nodes.getNode(req.query.id);
@@ -318,6 +322,8 @@ module.exports = function (RED) {
       }
 
       out.expiration = node.tokenExpiration(accessToken);
+    } else {
+      out.msg = "Node not deployed"
     }
 
     res.json(out);
@@ -326,14 +332,17 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/clearToken', function (req, res) {
     let out = {
       cleared: false,
+      msg: undefined
     };
 
     let node = RED.nodes.getNode(req.query.id);
     if (node) {
       node.context().set('accessToken', undefined);
-      res.json({cleared: true});
+      res.json({ cleared: true });
 
       out.cleared = true;
+    } else {
+      out.msg = "Node not deployed"
     }
 
     res.json(out);
@@ -342,6 +351,7 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/clearCredentialsFile', function (req, res) {
     let out = {
       cleared: false,
+      msg: undefined
     };
 
     let node = RED.nodes.getNode(req.query.id);
@@ -350,6 +360,8 @@ module.exports = function (RED) {
       node.clearCredentialsFile();
 
       out.cleared = true;
+    } else {
+      out.msg = "Node not deployed"
     }
 
     res.json(out);
@@ -363,6 +375,8 @@ module.exports = function (RED) {
     let node = RED.nodes.getNode(req.query.id);
     if (node) {
       out.signals = JSON.stringify(node.db.get('signals').value());
+    } else {
+      out.msg = "Node not deployed"
     }
 
     res.json(out);
