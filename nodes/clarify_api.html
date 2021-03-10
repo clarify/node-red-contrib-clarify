@@ -132,12 +132,11 @@
             $.getJSON('/getToken', {id: parent.id})
               .done(data => {
                 if (!data.created) {
-                  if(data.msg){
+                  if (data.msg) {
                     $('#tokenError').html(data.msg);
-                  }else{
+                  } else {
                     $('#tokenError').html('Could not get token');
                   }
-                  
                 } else {
                   $('#tokenExpiration').change();
                 }
