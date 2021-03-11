@@ -9,18 +9,19 @@ module.exports = function (RED) {
   function ClarifyInsertNode(config) {
     RED.nodes.createNode(this, config);
     this.api = RED.nodes.getNode(config.apiRef);
-
-    const signalStore = this.api.db.get('signals');
+    this.signalStore = this.api.db.get('signals');
 
     this.reporting = null;
     this.reportingTime = 500;
 
     this.dataBuffer = {};
+    this.dataError = false;
     this.dataBuffering = null;
     this.dataBufferMutex = new Mutex();
     this.dataBufferTime = 5000;
 
     this.ensureBuffer = {};
+    this.ensureError = false;
     this.ensureBuffering = null;
     this.ensureBufferMutex = new Mutex();
     this.ensureBufferTime = 5000;
@@ -51,7 +52,13 @@ module.exports = function (RED) {
           dataBufferLength = Object.keys(node.dataBuffer).length;
           ensureBufferLength = Object.keys(node.ensureBuffer).length;
 
-          if (dataBufferLength > 0 || ensureBufferLength > 0) {
+          if (node.dataError && node.ensureError) {
+            node.status({fill: 'red', shape: 'ring', text: 'Ensure: error, Insert: error'});
+          } else if (node.ensureError) {
+            node.status({fill: 'red', shape: 'ring', text: 'Ensure: error, Insert: OK'});
+          } else if (node.dataError) {
+            node.status({fill: 'red', shape: 'ring', text: 'Ensure: OK, Insert: error'});
+          } else if (dataBufferLength > 0 || ensureBufferLength > 0) {
             let text = '#meta: ' + ensureBufferLength + '. #data: ' + dataBufferLength;
             node.status({text: text});
           } else {
@@ -74,21 +81,18 @@ module.exports = function (RED) {
               return dataBuffer;
             })
             .then(function (dataBuffer) {
-              node.reportBuffer();
-
               data = util.structureData(dataBuffer);
-
               node.api
                 .insert(data)
                 .then(response => {
-                  node.send({
-                    payload: response,
-                  });
+                  node.dataError = false;
+                  node.send([{payload: response}, null]);
                 })
                 .catch(error => {
-                  node.status({fill: 'red', shape: 'ring', text: error});
-                  node.send(error);
+                  node.dataError = true;
+                  node.send([null, error]);
                 });
+              node.reportBuffer();
             });
 
           node.dataBuffering = null;
@@ -108,8 +112,6 @@ module.exports = function (RED) {
               return ensureBuffer;
             })
             .then(function (ensureBuffer) {
-              node.reportBuffer();
-
               node.api
                 .ensureInputs(ensureBuffer)
                 .then(response => {
@@ -128,12 +130,14 @@ module.exports = function (RED) {
                       signalStore.push({id: id, data: signal}).write();
                     }
                   }
-                  node.send({payload: response});
+                  node.ensureError = false;
+                  node.send([{payload: response}, null]);
                 })
                 .catch(error => {
-                  node.status({fill: 'red', shape: 'ring', text: error});
-                  node.send(error);
+                  node.ensureError = true;
+                  node.send([null, error]);
                 });
+              node.reportBuffer();
             });
 
           node.ensureBuffering = null;
@@ -162,7 +166,7 @@ module.exports = function (RED) {
         return;
       }
 
-      let savedSignal = signalStore.find({id: id}).value();
+      let savedSignal = node.signalStore.find({id: id}).value();
 
       if (config.alwaysEnsure || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data)) {
         node.addEnsureToBuffer(id, signal);

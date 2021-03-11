@@ -45,8 +45,8 @@
         };
         reader.onload = function (e) {
           obj = JSON.parse(e.target.result);
-          if (obj.apiURL === undefined || obj.apiURL === '') {
-            $('#credentialFileError').html('Missing apiURL');
+          if (obj.apiUrl === undefined || obj.apiUrl === '') {
+            $('#credentialFileError').html('Missing apiUrl');
             return;
           }
           if (obj.integration === undefined || obj.integration === '') {
