@@ -25,7 +25,7 @@ module.exports = function (RED) {
     this.updateCredentials = function () {
       if (this.credentials.credentialsFile !== undefined) {
         credentialsFile = JSON.parse(this.credentials.credentialsFile);
-        this.credentials.apiUrl = credentialsFile.apiURL;
+        this.credentials.apiUrl = credentialsFile.apiUrl;
         this.credentials.clientId = credentialsFile.credentials.clientId;
         this.credentials.clientSecret = credentialsFile.credentials.clientSecret;
         this.credentials.integrationId = credentialsFile.integration;
@@ -39,6 +39,9 @@ module.exports = function (RED) {
       if (this.credentials.apiUrl === undefined) {
         return;
       }
+
+      // Strip slash from apiUrl
+      this.credentials.apiUrl = this.credentials.apiUrl.replace(/\/$/, '');
 
       if (this.credentials.overrideTokenUrl) {
         this.credentials.tokenUrl = this.credentials.overrideTokenUrl;
@@ -338,7 +341,6 @@ module.exports = function (RED) {
     let node = RED.nodes.getNode(req.query.id);
     if (node) {
       node.context().set('accessToken', undefined);
-      res.json({cleared: true});
 
       out.cleared = true;
     } else {
