@@ -3,6 +3,9 @@
     "version": "1.0.0-alpha.1",
     "description": "A Node-Red node to insert data into Clarify",
     "repository": "git://github.com/searis/node-red-contrib-clarify.git",
+    "scripts": {
+        "test": "./node_modules/mocha/bin/mocha \"./nodes/test/**/*_spec.js\""
+    },
     "directories": {
         "nodes": "./nodes",
         "examples": "./examples"
@@ -41,5 +44,12 @@
         "object-hash": "^2.1.1",
         "qs": "^6.9.6",
         "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "mocha": "^8.3.1",
+        "njwt": "^1.0.0",
+        "nock": "^13.0.11",
+        "node-red": "^1.2.9",
+        "node-red-node-test-helper": "^0.2.7"
     }
 }

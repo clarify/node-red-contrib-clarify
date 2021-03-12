@@ -130,6 +130,7 @@ module.exports = function (RED) {
             audience: node.credentials.audience,
           }),
         };
+
         axios(options)
           .then(response => {
             nodeContext.set('accessToken', response.data.access_token);
@@ -139,15 +140,20 @@ module.exports = function (RED) {
             if (error.response) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
-              reject(error.response);
+              let custom_error = new Error(error.message);
+              custom_error.status = error.response.status || 500;
+              custom_error.description = error.response.data ? error.response.data.message : null;
+              reject(custom_error);
             } else if (error.request) {
               // The request was made but no response was received
               // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
               // http.ClientRequest in node.js
-              reject(error.request);
+              let custom_error = new Error(error.message);
+              custom_error.status = 500;
+              reject(custom_error);
             } else {
               // Something happened in setting up the request that triggered an Error
-              reject(error.message);
+              reject(new Error(error.message));
             }
           });
       });
