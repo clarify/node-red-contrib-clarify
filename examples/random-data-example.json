@@ -1,0 +1,119 @@
+[
+    {
+        "id": "fd854e1b.d7463",
+        "type": "clarify_insert",
+        "z": "3d4fe7a7.5ede48",
+        "name": "",
+        "apiRef": "715050d8.0a98a",
+        "signalId": "payload.id",
+        "signalName": "payload.name",
+        "signalDataType": "payload.dataType",
+        "signalDescription": "payload.description",
+        "signalLabels": "payload.labels",
+        "signalAnnotations": "payload.annotations",
+        "signalEngUnit": "payload.engUnit",
+        "signalEnumValues": "payload.enumValues",
+        "signalSourceType": "payload.sourceType",
+        "signalSampleInterval": "payload.sampleInterval",
+        "signalGapDetection": "payload.gapDetection",
+        "signalDataTimes": "payload.data.times",
+        "signalDataSeries": "payload.data.series",
+        "alwaysEnsure": false,
+        "x": 1010,
+        "y": 540,
+        "wires": [
+            [
+                "abb34846.c4eaa8"
+            ],
+            [
+                "5fdc3161.a92c6"
+            ]
+        ]
+    },
+    {
+        "id": "ee32740.50e1f9",
+        "type": "inject",
+        "z": "3d4fe7a7.5ede48",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 540,
+        "y": 540,
+        "wires": [
+            [
+                "866865e0.dcb3c8"
+            ]
+        ]
+    },
+    {
+        "id": "866865e0.dcb3c8",
+        "type": "function",
+        "z": "3d4fe7a7.5ede48",
+        "name": "Generate data",
+        "func": "let now = msg.payload;\nmsg.payload = {};\nmsg.payload.id = \"your-first-signal-id\";\nmsg.payload.name = \"Random Signal 1\";\nmsg.payload.data = {\n    \"times\": [new Date(now).toISOString()],\n    \"series\": [Math.floor(Math.random() * 101)],\n    \n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 540,
+        "wires": [
+            [
+                "fd854e1b.d7463"
+            ]
+        ]
+    },
+    {
+        "id": "abb34846.c4eaa8",
+        "type": "debug",
+        "z": "3d4fe7a7.5ede48",
+        "name": "Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1210,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "5fdc3161.a92c6",
+        "type": "debug",
+        "z": "3d4fe7a7.5ede48",
+        "name": "Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1210,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "715050d8.0a98a",
+        "type": "clarify_api",
+        "name": ""
+    }
+]
