@@ -1,21 +1,18 @@
 # node-red-contrib-clarify
-Node-Red Nodes for adding data to Clarify
-Learn more about Clarify at: https://www.searis.no/clarify
+
+Node-Red Nodes for adding data to Clarify.
+Learn more about Clarify at: https://www.clarify.us
 
 Available nodes are:
-* clarify_api: A configuration node to establish connection to Clarify.
-* clarify_insert: A node to insert data in Clarify.
 
-The ensure-signal node relies on context info to persist deploys and restarts to store the id of the created signal and item.
-In-memory storage (which is enabled by default) does not persist deploys and restarts and it is therefore necessary to enable
-local file system storage for context. This is done by setting the following in your node-red settings.js.
+- clarify_insert: A node to create signals, update meta-data and insert data into Clarify.
+- clarify_api: A `configuration node` to establish connection to Clarify.
 
-```
-    contextStorage: {
-        default: {
-            module: "localfilesystem"
-        },
-    },
-```
+This node will create a json-database to keep track of the signals and meta data written to Clarify.
 
-Any questions? Send us an email on teknisk@searis.no
+This database will be stored in the default userDir. By default, this directory is a directory called `.node-red` under
+the user's home directory, but can be overriden in the `node-red-settings.js`.
+
+If you are moving your node-red instance or creating backups, be sure to include the `clarify_db.json`.
+
+Any questions? Send us an email on support@clarify.us
