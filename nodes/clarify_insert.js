@@ -148,6 +148,12 @@ module.exports = function (RED) {
     this.on('input', async function (msg, send, done) {
       // Validate incoming id. Must be correct to continue
       let id = RED.util.getMessageProperty(msg, config.signalId);
+      if (id === undefined) {
+        let errMsg = 'missing signal id';
+        node.status({fill: 'red', shape: 'ring', text: errMsg});
+        done(errMsg);
+        return;
+      }
       if (!signalIdPattern.test(id)) {
         let errMsg = 'invalid signal id';
         node.status({fill: 'red', shape: 'ring', text: errMsg});

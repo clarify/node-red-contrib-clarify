@@ -76,6 +76,10 @@ module.exports = function (RED) {
           case 'clarify.clfy.io': // dev
             this.credentials.tokenUrl = 'https://login.clarify.clfy.io/oauth/token';
             break;
+          case 'clarifyapp.clarify.us': // prod
+          case 'api.clarify.us': // prod api proxy
+            this.credentials.tokenUrl = 'https://login.clarify.us/oauth/token';
+            break;
         }
       }
 
