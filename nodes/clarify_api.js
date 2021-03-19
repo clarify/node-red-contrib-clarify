@@ -76,16 +76,22 @@ module.exports = function (RED) {
           case 'clarify.clfy.io': // dev
             this.credentials.tokenUrl = 'https://login.clarify.clfy.io/oauth/token';
             break;
-          case 'clarifyapp.clarify.us': // prod
-          case 'api.clarify.us': // prod api proxy
+          case 'api.clarify.us': // prod api (proxy)
             this.credentials.tokenUrl = 'https://login.clarify.us/oauth/token';
             break;
         }
       }
 
       if (this.credentials.audience === undefined) {
-        this.credentials.audience =
-          url.host === 'dev.clfy.io' ? `${url.protocol}//${url.host}/` : `${url.protocol}//${url.host}/api/`;
+        switch (this.credentials.audience) {
+          case 'dev.clfy.io':
+          case 'api.clarify.us':
+            url.host = `${url.protocol}//${url.host}/`;
+            break;
+          default:
+            url.host = `${url.protocol}//${url.host}/api/`;
+            break;
+        }
       }
     };
 
