@@ -83,13 +83,13 @@ module.exports = function (RED) {
       }
 
       if (this.credentials.audience === undefined) {
-        switch (this.credentials.audience) {
+        switch (url.host) {
           case 'dev.clfy.io':
           case 'api.clarify.us':
-            url.host = `${url.protocol}//${url.host}/`;
+            this.credentials.audience = `${url.protocol}//${url.host}/`;
             break;
           default:
-            url.host = `${url.protocol}//${url.host}/api/`;
+            this.credentials.audience = `${url.protocol}//${url.host}/api/`;
             break;
         }
       }
