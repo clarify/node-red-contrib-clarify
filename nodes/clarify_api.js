@@ -201,7 +201,7 @@ module.exports = function (RED) {
         },
       };
 
-      let url = ` ${node.credentials.apiUrl}/meta/rpc`;
+      let url = ` ${node.credentials.apiUrl}/v1/rpc`;
       return axios({
         method: 'POST',
         url: url,
@@ -255,7 +255,7 @@ module.exports = function (RED) {
         },
       };
 
-      let url = ` ${node.credentials.apiUrl}/input/rpc`;
+      let url = ` ${node.credentials.apiUrl}/v1/rpc`;
       return axios({
         method: 'POST',
         url: url,
