@@ -33,8 +33,19 @@ module.exports = {
     return data;
   },
   prepareData: function (RED, msg, config) {
-    let times = RED.util.getMessageProperty(msg, config.signalDataTimes);
-    let series = RED.util.getMessageProperty(msg, config.signalDataSeries);
+    let times = null;
+    try {
+      times = RED.util.getMessageProperty(msg, config.signalDataTimes);
+    } catch (e) {}
+
+    let series = null;
+    try {
+      series = RED.util.getMessageProperty(msg, config.signalDataSeries);
+    } catch (e) {}
+
+    if (times === null && series === null) {
+      return null;
+    }
 
     if (!Array.isArray(times)) {
       throw 'dataTimes must be array';

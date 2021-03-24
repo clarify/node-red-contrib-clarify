@@ -190,8 +190,10 @@ module.exports = function (RED) {
         return;
       }
 
-      node.addDataToBuffer(id, data);
-      node.flushDataBuffer();
+      if (data !== null) {
+        node.addDataToBuffer(id, data);
+        node.flushDataBuffer();
+      }
 
       node.reportBuffer();
 
