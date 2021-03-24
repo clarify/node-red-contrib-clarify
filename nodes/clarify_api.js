@@ -40,9 +40,6 @@ module.exports = function (RED) {
         return;
       }
 
-      // Strip slash from apiUrl
-      this.credentials.apiUrl = this.credentials.apiUrl.replace(/\/$/, '');
-
       if (this.credentials.overrideTokenUrl) {
         this.credentials.tokenUrl = this.credentials.overrideTokenUrl;
       }
@@ -67,13 +64,7 @@ module.exports = function (RED) {
 
       if (this.credentials.tokenUrl === undefined) {
         switch (url.host) {
-          case 'dev.clfy.io': // dev-legacy
-            this.credentials.tokenUrl = 'https://searis.auth0.com/oauth/token';
-            break;
-          case 'clarify.searis.no': // prod-legacy
-            this.credentials.tokenUrl = 'https://login.clarify.searis.no/oauth/token';
-            break;
-          case 'clarify.clfy.io': // dev
+          case 'api.clfy.io': // dev api (proxy)
             this.credentials.tokenUrl = 'https://login.clarify.clfy.io/oauth/token';
             break;
           case 'api.clarify.us': // prod api (proxy)
@@ -83,16 +74,11 @@ module.exports = function (RED) {
       }
 
       if (this.credentials.audience === undefined) {
-        switch (url.host) {
-          case 'dev.clfy.io':
-          case 'api.clarify.us':
-            this.credentials.audience = `${url.protocol}//${url.host}/`;
-            break;
-          default:
-            this.credentials.audience = `${url.protocol}//${url.host}/api/`;
-            break;
+        this.credentials.audience = this.credentials.apiUrl;
         }
-      }
+
+      // Strip slash from apiUrl
+      this.credentials.apiUrl = this.credentials.apiUrl.replace(/\/$/, '');
     };
 
     this.updateCredentials();
@@ -201,7 +187,7 @@ module.exports = function (RED) {
         },
       };
 
-      let url = ` ${node.credentials.apiUrl}/v1/rpc`;
+      let url = ` ${node.credentials.apiUrl}/rpc`;
       return axios({
         method: 'POST',
         url: url,
@@ -255,7 +241,8 @@ module.exports = function (RED) {
         },
       };
 
-      let url = ` ${node.credentials.apiUrl}/v1/rpc`;
+      let url = ` ${node.credentials.apiUrl}/rpc`;
+
       return axios({
         method: 'POST',
         url: url,
