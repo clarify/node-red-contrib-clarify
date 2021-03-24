@@ -52,12 +52,11 @@ module.exports = function (RED) {
           dataBufferLength = Object.keys(node.dataBuffer).length;
           ensureBufferLength = Object.keys(node.ensureBuffer).length;
 
-          if (node.dataError && node.ensureError) {
-            node.status({fill: 'red', shape: 'ring', text: 'Ensure: error, Insert: error'});
-          } else if (node.ensureError) {
-            node.status({fill: 'red', shape: 'ring', text: 'Ensure: error, Insert: OK'});
-          } else if (node.dataError) {
-            node.status({fill: 'red', shape: 'ring', text: 'Ensure: OK, Insert: error'});
+          if (node.dataError || node.ensureError) {
+            let dataStatus = node.dataError ? 'error' : 'OK';
+            let ensureStatus = node.ensureError ? 'error' : 'OK';
+            let text = `Ensure: ${ensureStatus}, Insert: ${dataStatus}`;
+            node.status({fill: 'red', shape: 'ring', text: text});
           } else if (dataBufferLength > 0 || ensureBufferLength > 0) {
             let text = '#meta: ' + ensureBufferLength + '. #data: ' + dataBufferLength;
             node.status({text: text});
@@ -169,6 +168,15 @@ module.exports = function (RED) {
         let errMsg = 'Invalid signal: ' + id;
         node.status({fill: 'red', shape: 'ring', text: errMsg});
         done(errMsg + '\n' + e);
+        return;
+      }
+
+      try {
+        node.api.checkApiVersion();
+      } catch (e) {
+        node.warn(e);
+        node.status({fill: 'red', shape: 'ring', text: e});
+        done(e);
         return;
       }
 
