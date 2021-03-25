@@ -146,7 +146,15 @@ module.exports = function (RED) {
 
     this.on('input', async function (msg, send, done) {
       // Validate incoming id. Must be correct to continue
-      let id = RED.util.getMessageProperty(msg, config.signalId);
+      var id;
+      try {
+        id = RED.util.getMessageProperty(msg, config.signalId);
+      } catch (e) {
+        let errMsg = 'unable to read payload';
+        node.status({fill: 'red', shape: 'ring', text: errMsg});
+        done(`${errMsg}: ${e}`);
+        return;
+      }
       if (id === undefined) {
         let errMsg = 'missing signal id';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
@@ -156,7 +164,7 @@ module.exports = function (RED) {
       if (!signalIdPattern.test(id)) {
         let errMsg = 'invalid signal id';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
-        done(errMsg);
+        done(`${errMsg}: ${id}`);
         return;
       }
 
@@ -168,15 +176,6 @@ module.exports = function (RED) {
         let errMsg = 'Invalid signal: ' + id;
         node.status({fill: 'red', shape: 'ring', text: errMsg});
         done(errMsg + '\n' + e);
-        return;
-      }
-
-      try {
-        node.api.checkApiVersion();
-      } catch (e) {
-        node.warn(e);
-        node.status({fill: 'red', shape: 'ring', text: e});
-        done(e);
         return;
       }
 

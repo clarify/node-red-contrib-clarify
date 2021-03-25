@@ -49,6 +49,18 @@
             $('#credentialFileError').html('Missing apiUrl');
             return;
           }
+          let url = new URL(obj.apiUrl);
+          let version = url.pathname.replace(/\//g, '');
+
+          switch (version) {
+            case 'v1':
+              // Supported version
+              break;
+            default:
+              $('#credentialFileError').html('Unsupported API version');
+            return;
+          }
+  
           if (obj.integration === undefined || obj.integration === '') {
             $('#credentialFileError').html('Missing integration (id)');
             return;
@@ -120,7 +132,7 @@
           });
       });
       $('#tokenExpiration').change();
-
+      
       $('#tokenControl').click(e => {
         switch ($(e.target).text()) {
           case 'Clear':
@@ -131,12 +143,12 @@
           case 'Check credentials':
             $.getJSON('/getToken', {id: parent.id})
               .done(data => {
+                
                 if (!data.created) {
                   if (data.msg) {
-                    $('#tokenError').html(data.msg);
-                  } else {
-                    $('#tokenError').html('Could not get token');
-                  }
+                    RED.notify(RED._("notification.warning", {message:JSON.stringify(data.msg)}),"warning");
+                  } 
+                  $('#tokenError').html('Could not get token');
                 } else {
                   $('#tokenExpiration').change();
                 }

@@ -61,10 +61,6 @@ module.exports = function (RED) {
       }
 
       let url = new URL(this.credentials.apiUrl);
-
-      // Get Api version by remove all forward slashes. I.e. /v1/ becomes v1
-      this.credentials.version = url.pathname.replace(/\//g, '');
-
       if (this.credentials.tokenUrl === undefined) {
         switch (url.host) {
           case 'api.clfy.io': // dev api (proxy)
@@ -175,16 +171,6 @@ module.exports = function (RED) {
     return true;
   }
 
-  ClarifyApiNode.prototype.checkApiVersion = function () {
-    switch (this.credentials.version) {
-      case 'v1':
-        // Supported version
-        break;
-      default:
-        throw 'Unsupported version ' + this.credentials.version;
-    }
-  };
-
   ClarifyApiNode.prototype.ensureInputs = function (signals) {
     var node = this;
 
@@ -255,7 +241,6 @@ module.exports = function (RED) {
       };
 
       let url = ` ${node.credentials.apiUrl}/rpc`;
-
       return axios({
         method: 'POST',
         url: url,
@@ -303,7 +288,10 @@ module.exports = function (RED) {
           res.json({created: true, token: token});
         })
         .catch(err => {
-          res.json({created: false});
+          res.json({
+            created: false,
+            msg: err.data,
+          });
         });
     } else {
       res.json({
