@@ -202,7 +202,7 @@ function validateMapIntWithString(validationErrors, varName, variable) {
   }
 
   for (const [key, values] of Object.entries(variable)) {
-    if (!Number.isInteger(key)) {
+    if (key !== parseInt(key).toString()) {
       validationErrors.push(key + ' in ' + varName + ' must be a integer');
       continue;
     }
