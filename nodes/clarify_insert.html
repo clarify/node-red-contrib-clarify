@@ -6,6 +6,13 @@
       defaults: {
         name: {value: ''},
         apiRef: {value: null, type: 'clarify_api'},
+        bufferTime: {
+          value: '5',
+          required: true,
+          validate: function (v) {
+            return RED.validators.number(v) && v >= 1;
+          },
+        },
         signalId: {
           value: 'payload.id',
           required: true,
@@ -91,13 +98,18 @@
 </script>
 
 <script type="text/html" data-template-name="clarify_insert">
-    <div class="form-row">
+  <div class="form-row">
     <label for="node-input-name"><span data-i18n="clarify_insert.label.name"></label>
     <input type="text" id="node-config-input-name" data-i18n="[placeholder]clarify_insert.label.name" />
   </div>
   <div class="form-row">
     <label for="node-input-apiRef"><span data-i18n="clarify_insert.label.credentials"></label>
     <input type="text" id="node-input-apiRef" data-i18n="[placeholder]clarify_insert.label.credentials" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-bufferTime"><i class="fa fa-clock-o"></i> <span data-i18n="clarify_insert.label.bufferTime"></span></label>
+    <input type="number" id="node-input-bufferTime" min="1" style="text-align:end; width:100px !important">
+    <label for="label"><span data-i18n="clarify_insert.label.secs"></label>
   </div>
   <div class="form-row">
     <h4 style="cursor: pointer;" id="advanced-settings-header">
