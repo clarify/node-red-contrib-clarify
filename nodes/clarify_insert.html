@@ -13,6 +13,10 @@
             return RED.validators.number(v) && v >= 1;
           },
         },
+        // Advanced settings
+        alwaysEnsure: {
+          value: false,
+        },
         signalId: {
           value: 'payload.id',
           required: true,
@@ -65,10 +69,6 @@
           value: 'payload.data.series',
           required: true,
         },
-        // Advanced settings
-        alwaysEnsure: {
-          value: false,
-        },
       },
       inputs: 1,
       outputs: 2,
@@ -120,7 +120,7 @@
   <div id="advanced-settings">
     <div class="form-row">
       <label for="node-input-alwaysEnsure"><span data-i18n="clarify_insert.label.alwaysEnsure"></label>
-      <input type="checkbox" id="node-input-alwaysEnsure" />
+      <input type="checkbox" id="node-input-alwaysEnsure" style="display:inline-block; width:auto; vertical-align:top;" />
     </div>
     <div class="form-row">
       <label for="node-input-signalId"><span data-i18n="clarify_insert.label.id"></label>
