@@ -23,9 +23,8 @@ module.exports = {
 
     data.times.forEach((t, i) => {
       uniqueIds.forEach(id => {
-        v = dataBuffer[t][id];
-        if (v) {
-          data.series[id][i] = v;
+        if (id in dataBuffer[t]) {
+          data.series[id][i] = dataBuffer[t][id];
         }
       });
     });
