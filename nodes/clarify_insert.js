@@ -60,6 +60,8 @@ module.exports = function (RED) {
           } else if (dataBufferLength > 0 || ensureBufferLength > 0) {
             let text = '#meta: ' + ensureBufferLength + '. #data: ' + dataBufferLength;
             node.status({text: text});
+          } else if (config.alwaysEnsure) {
+            node.status({fill: 'yellow', shape: 'ring', text: 'alwaysEnsure active'});
           } else {
             node.status({});
           }
