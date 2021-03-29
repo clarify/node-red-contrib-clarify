@@ -3,7 +3,7 @@ module.exports = function (RED) {
   const axios = require('axios').default;
   var url = require('url');
   var jwtDecode = require('jwt-decode');
-  var moment = require('moment');
+  const {DateTime} = require('luxon');
 
   const low = require('lowdb');
   const FileSync = require('lowdb/adapters/FileSync');
@@ -83,22 +83,12 @@ module.exports = function (RED) {
     this.updateCredentials();
 
     this.tokenValid = function (accessToken) {
-      let decoded;
-      try {
-        decoded = jwtDecode(accessToken);
-      } catch {
-        return false;
-      }
-      let exp = moment.unix(decoded.exp);
-      if (exp.subtract(5, 'minutes').isBefore(moment())) {
-        return false;
-      }
-      return true;
+      return tokenValid(accessToken);
     };
 
     this.tokenExpiration = function (accessToken) {
       let decoded = jwtDecode(accessToken);
-      return moment.unix(decoded.exp);
+      return DateTime.fromSeconds(decoded.exp).toRelative();
     };
 
     this.getAccessToken = async function () {
@@ -106,7 +96,7 @@ module.exports = function (RED) {
 
       return new Promise(function (resolve, reject) {
         let accessToken = nodeContext.get('accessToken');
-        if (accessToken && valid(accessToken)) {
+        if (accessToken && tokenValid(accessToken)) {
           resolve(accessToken);
           return;
         }
@@ -162,13 +152,18 @@ module.exports = function (RED) {
     },
   });
 
-  function valid(accessToken) {
-    let decoded = jwtDecode(accessToken);
-    let exp = moment.unix(decoded.exp);
-    if (exp.subtract(5, 'minutes').isBefore(moment())) {
+  function tokenValid(accessToken) {
+    let decoded;
+    try {
+      decoded = jwtDecode(accessToken);
+    } catch {
       return false;
     }
-    return true;
+
+    let exp = DateTime.fromSeconds(decoded.exp);
+    let limit = exp.minus({minutes: 5});
+
+    return limit > DateTime.now();
   }
 
   ClarifyApiNode.prototype.ensureInputs = function (signals) {

@@ -120,7 +120,7 @@
             $('#tokenError').html('');
             if (data.valid) {
               $('#tokenControl').html('Clear');
-              $('#tokenExpiration').html('Valid until ' + data.expiration);
+              $('#tokenExpiration').html('Expires ' + data.expiration + '.');
             } else {
               $('#tokenControl').html('Check credentials');
               $('#tokenExpiration').html('');
