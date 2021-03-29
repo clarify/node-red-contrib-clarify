@@ -8,23 +8,31 @@ module.exports = function (RED) {
 
   function ClarifyInsertNode(config) {
     RED.nodes.createNode(this, config);
+
     this.api = RED.nodes.getNode(config.apiRef);
     this.signalStore = this.api.db.get('signals');
 
     this.reporting = null;
     this.reportingTime = 500;
 
+    if (config.bufferTime > 1) {
+      this.bufferTime = config.bufferTime * 1000;
+    } else {
+      this.bufferTime = 5000;
+    }
+
     this.dataBuffer = {};
     this.dataError = false;
     this.dataBuffering = null;
     this.dataBufferMutex = new Mutex();
-    this.dataBufferTime = 5000;
+    // Flush data buffer a bit later than meta data
+    this.dataBufferTime = this.bufferTime + 500;
 
     this.ensureBuffer = {};
     this.ensureError = false;
     this.ensureBuffering = null;
     this.ensureBufferMutex = new Mutex();
-    this.ensureBufferTime = 5000;
+    this.ensureBufferTime = this.bufferTime;
 
     var node = this;
     node.addEnsureToBuffer = function (id, signal) {
