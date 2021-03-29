@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var moment = require('moment');
+const {DateTime} = require('luxon');
 
 const keyPattern = /^[a-zA-Z0-9_/-]{1,40}$/;
 
@@ -66,7 +66,12 @@ module.exports = {
     let _times = [];
     times.forEach(t => {
       // Normalize times to RFC3339 times in UTC.
-      _times.push(moment(t).toISOString());
+      let dt = DateTime.fromISO(t);
+      if (!dt.isValid) {
+        throw 'not valid RFC3339 time: ' + t;
+      }
+
+      _times.push(dt);
     });
 
     return {
