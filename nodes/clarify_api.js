@@ -166,13 +166,13 @@ module.exports = function (RED) {
     return limit > DateTime.now();
   }
 
-  ClarifyApiNode.prototype.ensureInputs = function (signals) {
+  ClarifyApiNode.prototype.saveSignals = function (signals) {
     var node = this;
 
     var req = node.getAccessToken().then(token => {
       var req = {
         jsonrpc: '2.0',
-        method: 'integration.EnsureInputs',
+        method: 'integration.SaveSignals',
         // TODO: Consider making pseudo-random string and verify that we receive the same one.
         id: 1,
         params: {
