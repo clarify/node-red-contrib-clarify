@@ -63,13 +63,13 @@ module.exports = function (RED) {
           if (node.dataError || node.ensureError) {
             let dataStatus = node.dataError ? 'error' : 'OK';
             let ensureStatus = node.ensureError ? 'error' : 'OK';
-            let text = `Ensure: ${ensureStatus}, Insert: ${dataStatus}`;
+            let text = `Save: ${ensureStatus}, Insert: ${dataStatus}`;
             node.status({fill: 'red', shape: 'ring', text: text});
           } else if (dataBufferLength > 0 || ensureBufferLength > 0) {
             let text = '#meta: ' + ensureBufferLength + '. #data: ' + dataBufferLength;
             node.status({text: text});
-          } else if (config.alwaysEnsure) {
-            node.status({fill: 'yellow', shape: 'ring', text: 'alwaysEnsure active'});
+          } else if (config.alwaysSaveMetadata) {
+            node.status({fill: 'yellow', shape: 'ring', text: 'alwaysSave active'});
           } else {
             node.status({});
           }
@@ -122,7 +122,7 @@ module.exports = function (RED) {
             })
             .then(function (ensureBuffer) {
               node.api
-                .ensureInputs(ensureBuffer)
+                .saveSignals(ensureBuffer)
                 .then(response => {
                   let signalsByInput = _.get(response, 'data.result.signalsByInput');
                   if (!signalsByInput) {
@@ -191,7 +191,7 @@ module.exports = function (RED) {
 
       let savedSignal = node.signalStore.find({id: id}).value();
 
-      if (config.alwaysEnsure || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data)) {
+      if (config.alwaysSaveMetadata || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data)) {
         node.addEnsureToBuffer(id, signal);
         node.flushEnsureBuffer();
       }
