@@ -130,13 +130,14 @@ module.exports = function (RED) {
                   }
 
                   for (id in signalsByInput) {
-                    let savedSignal = node.signalStore.find({id: id}).value();
+                    let integrationId = node.api.credentials.integrationId;
+                    let savedSignal = node.signalStore.find({id: id, integrationId: integrationId}).value();
                     let signal = ensureBuffer[id];
 
                     if (savedSignal) {
-                      node.signalStore.find({id: id}).assign({data: signal}).write();
+                      node.signalStore.find({id: id, integrationId: integrationId}).assign({data: signal}).write();
                     } else {
-                      node.signalStore.push({id: id, data: signal}).write();
+                      node.signalStore.push({id: id, integrationId: integrationId, data: signal}).write();
                     }
                   }
                   node.ensureError = false;
@@ -189,7 +190,8 @@ module.exports = function (RED) {
         return;
       }
 
-      let savedSignal = node.signalStore.find({id: id}).value();
+      let integrationId = node.api.credentials.integrationId;
+      let savedSignal = node.signalStore.find({id: id, integrationId: integrationId}).value();
 
       if (config.alwaysSaveMetadata || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data)) {
         node.addEnsureToBuffer(id, signal);
