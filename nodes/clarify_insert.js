@@ -99,7 +99,7 @@ module.exports = function (RED) {
                 })
                 .catch(error => {
                   node.dataError = true;
-                  node.send([null, error]);
+                  node.send([null, {error: error, requestType: 'insert'}]);
                 });
               node.reportBuffer();
             });
@@ -145,7 +145,7 @@ module.exports = function (RED) {
                 })
                 .catch(error => {
                   node.ensureError = true;
-                  node.send([null, error]);
+                  node.send([null, {error: error, requestType: 'saveSignals'}]);
                 });
               node.reportBuffer();
             });
