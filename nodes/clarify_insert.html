@@ -74,7 +74,8 @@
       outputs: 2,
       icon: 'clarify.png',
       label: function () {
-        return this.name || 'insert';
+        let name = this.name || 'insert';
+        return `${name} (${this.bufferTime}s)`;
       },
       oneditprepare: function () {
         $('.msg-field').typedInput({
