@@ -362,14 +362,18 @@ module.exports = function (RED) {
     res.json(out);
   });
 
-  RED.httpAdmin.get('/getCache', function (req, res) {
+  RED.httpAdmin.get('/clearCache', function (req, res) {
     let out = {
-      signals: {},
+      cleared: false,
+      msg: undefined,
     };
 
     let node = RED.nodes.getNode(req.query.id);
     if (node) {
-      out.signals = JSON.stringify(node.db.get('signals').value());
+      let integrationId = node.credentials.integrationId;
+      let signalsRemoved = node.db.get('signals').remove({integrationId: integrationId}).write();
+      out.msg = `Removed ${signalsRemoved.length} signals`;
+      out.cleared = true;
     } else {
       out.msg = 'Node not deployed';
     }

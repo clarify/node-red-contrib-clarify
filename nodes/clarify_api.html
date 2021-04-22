@@ -121,6 +121,10 @@
             if (data.valid) {
               $('#tokenControl').html('Clear');
               $('#tokenExpiration').html('Expires ' + data.expiration + '.');
+              // Clear expiration message after 3 seconds
+              setTimeout(function () {
+                $('#tokenExpiration').html('');
+              }, 3000);
             } else {
               $('#tokenControl').html('Check credentials');
               $('#tokenExpiration').html('');
@@ -170,6 +174,29 @@
           $('#advanced-settings').show();
         }
       });
+
+      $('#clearCache').click(e => {
+        $.getJSON('/clearCache', {id: parent.id})
+          .done(function (data) {
+            if (data.cleared) {
+              $('#clearCacheFeedback').html(data.msg);
+              // Clear feedback message after 3 seconds
+              setTimeout(function () {
+                $('#clearCacheFeedback').html('');
+              }, 3000);
+              $('#clearCacheError').html('');
+            } else {
+              $('#clearCacheFeedback').html('');
+              $('#clearCacheError').html(data.msg);
+            }
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var err = textStatus + ', ' + error;
+            $('#clearCacheFeedback').html('');
+            $('#clearCacheError').html(err);
+            console.error('Request Failed: ' + err);
+          });
+      });
     },
   });
 </script>
@@ -206,6 +233,16 @@
     </button>
     <span id="tokenExpiration"></span>
     <span id="tokenError" style="color: #AD1625;"></span>
+  </div>
+  <div class="form-row">
+    <label for="clearCache">
+      <span data-i18n="clarify_api.label.clearCache">
+    </label>
+    <button type="button" id="clearCache" class="red-ui-button">
+      <span data-i18n="clarify_api.label.clear">
+    </button>
+    <span id="clearCacheFeedback"></span>
+    <span id="clearCacheError" style="color: #AD1625;"></span>
   </div>
   <hr align="middle" />
   <div class="form-row">
