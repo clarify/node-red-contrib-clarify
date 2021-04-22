@@ -6,6 +6,7 @@
       "audience": "Audience",
       "chooseFile": "Choose file",
       "clear": "Clear",
+      "clearCache": "Clear cache",
       "clientId": "Client id",
       "clientSecret": "Client secret",
       "credentials": "Credentials",
