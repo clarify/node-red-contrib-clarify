@@ -99,7 +99,7 @@
       $('#clearCredentialsFile').click(() => {
         $('#credentialsFileHidden').val('');
         $('#node-config-input-credentialsFile').val('').change();
-        $.getJSON('/clearCredentialsFile', {id: parent.id}).done(() => {
+        $.getJSON('clearCredentialsFile', {id: parent.id}).done(() => {
           $('#tokenExpiration').change();
         });
       });
@@ -115,7 +115,7 @@
       });
 
       $('#tokenExpiration').on('change', function (event) {
-        $.getJSON('/tokenValid', {id: parent.id})
+        $.getJSON('tokenValid', {id: parent.id})
           .done(function (data) {
             $('#tokenError').html('');
             if (data.valid) {
@@ -141,7 +141,7 @@
       $('#tokenControl').click(e => {
         switch ($(e.target).text()) {
           case 'Clear':
-            $.getJSON('/clearToken', {id: parent.id})
+            $.getJSON('clearToken', {id: parent.id})
               .done(() => {
                 $('#tokenExpiration').change();
               })
@@ -151,7 +151,7 @@
               });
             break;
           case 'Check credentials':
-            $.getJSON('/getToken', {id: parent.id})
+            $.getJSON('getToken', {id: parent.id})
               .done(data => {
                 if (!data.created) {
                   if (data.msg) {
@@ -183,7 +183,7 @@
       });
 
       $('#clearCache').click(e => {
-        $.getJSON('/clearCache', {id: parent.id})
+        $.getJSON('clearCache', {id: parent.id})
           .done(function (data) {
             if (data.cleared) {
               $('#clearCacheFeedback').html(data.msg);
