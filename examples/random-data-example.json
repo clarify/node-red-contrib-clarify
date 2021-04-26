@@ -18,7 +18,6 @@
         "signalGapDetection": "payload.gapDetection",
         "signalDataTimes": "payload.data.times",
         "signalDataSeries": "payload.data.series",
-        "alwaysSaveMetadata": false,
         "x": 1010,
         "y": 540,
         "wires": [

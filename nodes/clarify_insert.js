@@ -28,6 +28,8 @@ module.exports = function (RED) {
     // Flush data buffer a bit later than meta data
     this.dataBufferTime = this.bufferTime + 500;
 
+    this.debug = false;
+
     this.ensureBuffer = {};
     this.ensureError = false;
     this.ensureBuffering = null;
@@ -68,8 +70,8 @@ module.exports = function (RED) {
           } else if (dataBufferLength > 0 || ensureBufferLength > 0) {
             let text = '#meta: ' + ensureBufferLength + '. #data: ' + dataBufferLength;
             node.status({text: text});
-          } else if (config.alwaysSaveMetadata) {
-            node.status({fill: 'yellow', shape: 'ring', text: 'alwaysSave active'});
+          } else if (node.debug) {
+            node.status({fill: 'yellow', shape: 'ring', text: 'Debug mode active'});
           } else {
             node.status({});
           }
@@ -190,10 +192,21 @@ module.exports = function (RED) {
         return;
       }
 
+      try {
+        let debug = RED.util.getMessageProperty(msg, 'debug');
+        if (debug) {
+          this.debug = true;
+        }
+      } finally {
+        if (this.debug) {
+          node.reportBuffer();
+        }
+      }
+
       let integrationId = node.api.credentials.integrationId;
       let savedSignal = node.signalStore.find({id: id, integrationId: integrationId}).value();
 
-      if (config.alwaysSaveMetadata || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data)) {
+      if (this.debug || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data)) {
         node.addEnsureToBuffer(id, signal);
         node.flushEnsureBuffer();
       }

@@ -1,7 +1,6 @@
 {
   "clarify_insert": {
     "label": {
-      "alwaysSaveMetadata": "Always save Metadata",
       "annotations": "Annotations",
       "bufferTime": "Buffer time",
       "credentials": "Credentials",
