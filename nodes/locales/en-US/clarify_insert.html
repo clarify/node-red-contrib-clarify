@@ -14,7 +14,7 @@
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>ID <span class="property-type">msg.payload.id</span></dt>
-    <dd>A unique id per signal that has to match the regex for Clarify ID's <code>/^[a-z0-9_-]{1,40}$/</code>. If the id is changed will a new signal be created.</dd>
+    <dd>A unique id per signal that has to match the regex for the Clarify Input ID, <code>/^[a-z0-9_-]{1,40}$/</code>. If the id is changed will a new signal be created.</dd>
     <dd>Expects: string</dd>
 
     <dt>Name <span class="property-type">msg.payload.name</span></dt>
@@ -29,7 +29,7 @@
     <dd>Description of the signal. Defaults to empty.</dd>
     <dd>Expects: string</dd>
 
-    <dt class="optional">annotations <span class="property-type">msg.payload.labels</span></dt>
+    <dt class="optional">Labels <span class="property-type">msg.payload.labels</span></dt>
     <dd>Labels.</dd>
     <dd>Expects: Map[string]string[].</dd>
     <dd>Example: <code>{"equipment":["fan","engine"]}</code></dd>
