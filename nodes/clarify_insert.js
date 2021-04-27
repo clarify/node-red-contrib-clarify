@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var Mutex = require('async-mutex').Mutex;
 
-const signalIdPattern = /^[a-z0-9_-]{1,40}$/;
+const clarifyInputIdRegEx = /^[a-z0-9_-]{1,40}$/;
 
 module.exports = function (RED) {
   var util = require('./clarify_util');
@@ -174,7 +174,7 @@ module.exports = function (RED) {
         done(errMsg);
         return;
       }
-      if (!signalIdPattern.test(id)) {
+      if (!clarifyInputIdRegEx.test(id)) {
         let errMsg = 'invalid signal id';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
         done(`${errMsg}: ${id}`);
