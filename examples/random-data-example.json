@@ -7,7 +7,7 @@
         "apiRef": "715050d8.0a98a",
         "signalId": "payload.id",
         "signalName": "payload.name",
-        "signalDataType": "payload.dataType",
+        "signalType": "payload.type",
         "signalDescription": "payload.description",
         "signalLabels": "payload.labels",
         "signalAnnotations": "payload.annotations",

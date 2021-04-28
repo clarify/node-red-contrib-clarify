@@ -6,7 +6,7 @@
       "credentials": "Credentials",
       "dataSeries": "Data series",
       "dataTimes": "Data times",
-      "dataType": "Data type",
+      "type": "Type",
       "description": "Description",
       "engUnit": "Eng. unit",
       "enumValues": "Enum values",
