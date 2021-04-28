@@ -80,7 +80,7 @@ module.exports = {
   },
   prepareSignal: function (RED, msg, config) {
     let name = RED.util.getMessageProperty(msg, config.signalName);
-    let dataType = RED.util.getMessageProperty(msg, config.signalDataType);
+    let type = RED.util.getMessageProperty(msg, config.signalType);
     let description = RED.util.getMessageProperty(msg, config.signalDescription);
     let engUnit = RED.util.getMessageProperty(msg, config.signalEngUnit);
     let labels = RED.util.getMessageProperty(msg, config.signalLabels);
@@ -92,7 +92,7 @@ module.exports = {
 
     let validationErrors = [];
     validateString(validationErrors, 'name', name);
-    validateString(validationErrors, 'dataType', dataType);
+    validateString(validationErrors, 'type', type);
     validateString(validationErrors, 'description', description);
     validateMapStringWithStrings(validationErrors, 'labels', labels);
     validateMapStringWithStrings(validationErrors, 'annotations', annotations);
@@ -108,7 +108,7 @@ module.exports = {
 
     let signal = {};
     assignIfDefined(signal, 'name', name);
-    assignIfDefined(signal, 'type', dataType);
+    assignIfDefined(signal, 'type', type);
     assignIfDefined(signal, 'description', description);
     assignIfDefined(signal, 'labels', labels);
     assignIfDefined(signal, 'annotations', annotations);
@@ -134,10 +134,10 @@ function validateString(validationErrors, varName, variable) {
   // Field spesific validations
   let allowed = [];
   switch (varName) {
-    case 'dataType':
+    case 'type':
       allowed = ['enum', 'numeric'];
       if (!allowed.includes(variable)) {
-        validationErrors.push('unsupported dataType: ' + variable);
+        validationErrors.push('unsupported type: ' + variable);
       }
       break;
     case 'sourceType':
