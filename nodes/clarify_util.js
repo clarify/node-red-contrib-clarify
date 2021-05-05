@@ -1,5 +1,5 @@
 var _ = require('lodash');
-const {DateTime} = require('luxon');
+const {DateTime, Duration} = require('luxon');
 
 const keyPattern = /^[a-zA-Z0-9_/-]{1,40}$/;
 
@@ -146,6 +146,12 @@ function validateString(validationErrors, varName, variable) {
       allowed = ['aggregation', 'measurement', 'prediction'];
       if (!allowed.includes(variable)) {
         validationErrors.push('unsupported sourceType: ' + variable);
+      }
+      break;
+    case ('gapDetection', 'sampleInterval'):
+      let d = Duration.fromISO(variable);
+      if (!d.isValid) {
+        validationErrors.push(`${varName} is not a valid RFC3339 duration (${variable})`);
       }
       break;
   }
