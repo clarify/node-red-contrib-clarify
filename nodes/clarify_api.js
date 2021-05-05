@@ -11,6 +11,9 @@ module.exports = function (RED) {
   const adapter = new FileSync(RED.settings.userDir + '/clarify_db.json');
   const db = low(adapter);
 
+  const packageInfo = require('../package.json');
+  const userAgent = `${packageInfo['name']}/${packageInfo['version']}`;
+
   function ClarifyApiNode(config) {
     RED.nodes.createNode(this, config);
 
@@ -189,6 +192,7 @@ module.exports = function (RED) {
           Authorization: 'Bearer ' + token,
           contentType: 'application/json',
           'X-API-Version': '1.0',
+          'User-Agent': userAgent,
         },
         data: req,
       }).catch(error => {
@@ -243,6 +247,7 @@ module.exports = function (RED) {
           Authorization: 'Bearer ' + token,
           contentType: 'application/json',
           'X-API-Version': '1.0',
+          'User-Agent': userAgent,
         },
         data: req,
       }).catch(error => {
