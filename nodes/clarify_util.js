@@ -31,6 +31,7 @@ module.exports = {
 
     return data;
   },
+
   prepareData: function (RED, msg, config) {
     let times = null;
     try {
@@ -78,6 +79,7 @@ module.exports = {
       series: series,
     };
   },
+
   prepareSignal: function (RED, msg, config) {
     let name = RED.util.getMessageProperty(msg, config.signalName);
     let type = RED.util.getMessageProperty(msg, config.signalType);
@@ -95,7 +97,7 @@ module.exports = {
     validateString(validationErrors, 'type', type);
     validateString(validationErrors, 'description', description);
     validateMapStringWithStrings(validationErrors, 'labels', labels);
-    validateMapStringWithStrings(validationErrors, 'annotations', annotations);
+    validateMapStringWithString(validationErrors, 'annotations', annotations);
     validateMapIntWithString(validationErrors, 'enumValues', enumValues);
     validateString(validationErrors, 'engUnit', engUnit);
     validateString(validationErrors, 'sourceType', sourceType);
@@ -189,6 +191,48 @@ function validateMapStringWithStrings(validationErrors, varName, variable) {
 
     if (!_.every(values, _.isString)) {
       validationErrors.push(varName + '.' + key + ' values must be an array of strings');
+    }
+  }
+
+  return validationErrors;
+}
+
+function validateMapStringWithString(validationErrors, varName, variable) {
+  if (variable === undefined) {
+    return;
+  }
+
+  if (typeof variable !== 'object') {
+    validationErrors.push(varName + ' must be object');
+    return;
+  }
+
+  for (const [key, values] of Object.entries(variable)) {
+    if (typeof key !== 'string') {
+      validationErrors.push(key + ' in ' + varName + ' must be a string');
+      continue;
+    }
+
+    if (key === '') {
+      validationErrors.push(varName + ' keys can not be empty');
+      continue;
+    }
+
+    if (key.length > 40) {
+      validationErrors.push(key + ' in ' + varName + ' is too long. Max 40 chars.');
+    }
+
+    if (key.indexOf(' ') >= 0) {
+      validationErrors.push(key + ' in ' + varName + ' can not contain spaces.');
+    }
+
+    if (!keyPattern.test(key)) {
+      validationErrors.push(key + ' in ' + varName + ' must fulfil ' + keyPattern);
+    }
+
+    if (typeof values !== 'string') {
+      validationErrors.push(varName + '.' + key + ' must be a string');
+      continue;
     }
   }
 
