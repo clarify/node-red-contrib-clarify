@@ -168,14 +168,9 @@ module.exports = function (RED) {
         done(`${errMsg}: ${e}`);
         return;
       }
-      if (id === undefined) {
-        let errMsg = 'missing signal id';
-        node.status({fill: 'red', shape: 'ring', text: errMsg});
-        done(errMsg);
-        return;
-      }
-      if (!clarifyInputIdRegEx.test(id)) {
-        let errMsg = 'invalid signal id';
+
+      if (id === undefined || !clarifyInputIdRegEx.test(id)) {
+        let errMsg = 'missing or invalid signal id';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
         done(`${errMsg}: ${id}`);
         return;
