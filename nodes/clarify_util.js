@@ -104,6 +104,10 @@ module.exports = {
     validateString(validationErrors, 'sampleInterval', sampleInterval);
     validateString(validationErrors, 'gapDetection', gapDetection);
 
+    if (enumValues && type != 'enum') {
+      validationErrors.push('enumValues can only be set for enums');
+    }
+
     if (validationErrors.length > 0) {
       throw validationErrors.join('\n');
     }
