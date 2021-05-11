@@ -178,14 +178,6 @@ function validateMapStringWithStrings(validationErrors, varName, variable) {
       continue;
     }
 
-    if (key.length > 40) {
-      validationErrors.push(key + ' in ' + varName + ' is too long. Max 40 chars.');
-    }
-
-    if (key.indexOf(' ') >= 0) {
-      validationErrors.push(key + ' in ' + varName + ' can not contain spaces.');
-    }
-
     if (!keyPattern.test(key)) {
       validationErrors.push(key + ' in ' + varName + ' must fulfil ' + keyPattern);
     }
@@ -222,14 +214,6 @@ function validateMapStringWithString(validationErrors, varName, variable) {
     if (key === '') {
       validationErrors.push(varName + ' keys can not be empty');
       continue;
-    }
-
-    if (key.length > 40) {
-      validationErrors.push(key + ' in ' + varName + ' is too long. Max 40 chars.');
-    }
-
-    if (key.indexOf(' ') >= 0) {
-      validationErrors.push(key + ' in ' + varName + ' can not contain spaces.');
     }
 
     if (!keyPattern.test(key)) {
