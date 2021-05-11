@@ -63,7 +63,7 @@
         "type": "function",
         "z": "3d4fe7a7.5ede48",
         "name": "Generate data",
-        "func": "let now = msg.payload;\nmsg.payload = {};\nmsg.payload.id = \"your-first-signal-id\";\nmsg.payload.name = \"Random Signal 1\";\nmsg.payload.data = {\n    \"times\": [new Date(now).toISOString()],\n    \"series\": [Math.floor(Math.random() * 101)],\n    \n};\nreturn msg;",
+        "func": "let now = msg.payload;\nmsg.payload = {};\nmsg.payload.id = \"your-first-signal-id\";\nmsg.payload.name = \"Random Signal 1\";\nmsg.payload.type = \"numeric\";\nmsg.payload.data = {\n    \"times\": [new Date(now).toISOString()],\n    \"series\": [Math.floor(Math.random() * 101)],\n    \n};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
