@@ -94,15 +94,15 @@ module.exports = {
 
     let validationErrors = [];
     validateString(validationErrors, 'name', name);
-    validateString(validationErrors, 'type', type);
+    validateStringEnum(validationErrors, 'type', type, ['enum', 'numeric']);
     validateString(validationErrors, 'description', description);
     validateMapStringWithStrings(validationErrors, 'labels', labels);
     validateMapStringWithString(validationErrors, 'annotations', annotations);
     validateMapIntWithString(validationErrors, 'enumValues', enumValues);
     validateString(validationErrors, 'engUnit', engUnit);
-    validateString(validationErrors, 'sourceType', sourceType);
-    validateString(validationErrors, 'sampleInterval', sampleInterval);
-    validateString(validationErrors, 'gapDetection', gapDetection);
+    validateStringEnum(validationErrors, 'sourceType', sourceType, ['aggregation', 'measurement', 'prediction']);
+    validateStringRFC3339(validationErrors, 'sampleInterval', sampleInterval);
+    validateStringRFC3339(validationErrors, 'gapDetection', gapDetection);
 
     if (validationErrors.length > 0) {
       throw validationErrors.join('\n');
@@ -132,28 +132,37 @@ function validateString(validationErrors, varName, variable) {
     validationErrors.push(varName + ' must be string');
     return;
   }
+}
 
-  // Field spesific validations
-  let allowed = [];
-  switch (varName) {
-    case 'type':
-      allowed = ['enum', 'numeric'];
-      if (!allowed.includes(variable)) {
-        validationErrors.push('unsupported type: ' + variable);
-      }
-      break;
-    case 'sourceType':
-      allowed = ['aggregation', 'measurement', 'prediction'];
-      if (!allowed.includes(variable)) {
-        validationErrors.push('unsupported sourceType: ' + variable);
-      }
-      break;
-    case ('gapDetection', 'sampleInterval'):
-      let d = Duration.fromISO(variable);
-      if (!d.isValid) {
-        validationErrors.push(`${varName} is not a valid RFC3339 duration (${variable})`);
-      }
-      break;
+function validateStringEnum(validationErrors, varName, variable, allowed) {
+  validateString(validationErrors, varName, variable);
+  if (validationErrors.length > 0) {
+    return;
+  }
+
+  if (!allowed.includes(variable)) {
+    validationErrors.push(`unsupported ${varName}: ${variable}`);
+    return;
+  }
+}
+
+function validateStringRFC3339(validationErrors, varName, variable) {
+  validateString(validationErrors, varName, variable);
+  if (validationErrors.length > 0) {
+    return;
+  }
+
+  let d = Duration.fromISO(variable);
+  if (!d.isValid) {
+    validationErrors.push(`${varName} isn't a valid RFC3339 duration (${variable})`);
+    return;
+  }
+
+  if (d.years > 0 || d.months > 0) {
+    validationErrors.push(
+      `${varName} must be an RFC3339 duration with entries from week to fraction only (${variable})`,
+    );
+    return;
   }
 }
 
