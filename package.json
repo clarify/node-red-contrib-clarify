@@ -1,6 +1,6 @@
 {
     "name": "@searis/node-red-contrib-clarify",
-    "version": "1.0.0-alpha.7",
+    "version": "1.0.0-beta.1",
     "description": "A Node-Red node to insert data into Clarify",
     "repository": "git://github.com/searis/node-red-contrib-clarify.git",
     "directories": {
