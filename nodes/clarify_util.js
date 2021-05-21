@@ -135,8 +135,12 @@ function validateString(validationErrors, varName, variable) {
 }
 
 function validateStringEnum(validationErrors, varName, variable, allowed) {
-  validateString(validationErrors, varName, variable);
-  if (validationErrors.length > 0) {
+  if (variable === undefined) {
+    return;
+  }
+
+  if (typeof variable !== 'string') {
+    validationErrors.push(varName + ' must be string');
     return;
   }
 
@@ -147,8 +151,12 @@ function validateStringEnum(validationErrors, varName, variable, allowed) {
 }
 
 function validateStringRFC3339(validationErrors, varName, variable) {
-  validateString(validationErrors, varName, variable);
-  if (validationErrors.length > 0) {
+  if (variable === undefined) {
+    return;
+  }
+
+  if (typeof variable !== 'string') {
+    validationErrors.push(varName + ' must be string');
     return;
   }
 
