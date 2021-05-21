@@ -13,59 +13,6 @@
             return RED.validators.number(v) && v >= 1;
           },
         },
-        // Advanced settings
-        signalId: {
-          value: 'payload.id',
-          required: true,
-        },
-        signalName: {
-          value: 'payload.name',
-          required: true,
-        },
-        signalType: {
-          value: 'payload.type',
-          required: true,
-        },
-        signalDescription: {
-          value: 'payload.description',
-          required: true,
-        },
-        signalLabels: {
-          value: 'payload.labels',
-          required: true,
-        },
-        signalAnnotations: {
-          value: 'payload.annotations',
-          required: true,
-        },
-        signalEngUnit: {
-          value: 'payload.engUnit',
-          required: true,
-        },
-        signalEnumValues: {
-          value: 'payload.enumValues',
-          required: true,
-        },
-        signalSourceType: {
-          value: 'payload.sourceType',
-          required: true,
-        },
-        signalSampleInterval: {
-          value: 'payload.sampleInterval',
-          required: true,
-        },
-        signalGapDetection: {
-          value: 'payload.gapDetection',
-          required: true,
-        },
-        signalDataTimes: {
-          value: 'payload.data.times',
-          required: true,
-        },
-        signalDataSeries: {
-          value: 'payload.data.series',
-          required: true,
-        },
       },
       inputs: 1,
       outputs: 2,
@@ -78,17 +25,6 @@
         $('.msg-field').typedInput({
           default: 'msg',
           types: ['msg'],
-        });
-
-        $('#advanced-settings').hide();
-        $('#advanced-settings-header').click(() => {
-          if ($('#advanced-settings').is(':visible')) {
-            $('#advanced-settings-caret').addClass('fa-caret-right').removeClass('fa-caret-down');
-            $('#advanced-settings').hide();
-          } else {
-            $('#advanced-settings-caret').addClass('fa-caret-down').removeClass('fa-caret-right');
-            $('#advanced-settings').show();
-          }
         });
       },
     });
@@ -108,65 +44,5 @@
     <label for="node-input-bufferTime"><i class="fa fa-clock-o"></i> <span data-i18n="clarify_insert.label.bufferTime"></span></label>
     <input type="number" id="node-input-bufferTime" min="1" style="text-align:end; width:100px !important">
     <label for="label"><span data-i18n="clarify_insert.label.secs"></label>
-  </div>
-  <div class="form-row">
-    <h4 style="cursor: pointer;" id="advanced-settings-header">
-      <i class="fa fa-caret-right" id="advanced-settings-caret"></i>
-      <span data-i18n="clarify_insert.header.advancedSettings">
-    </h4>
-  </div>
-  <div id="advanced-settings">
-    <div class="form-row">
-      <label for="node-input-signalId"><span data-i18n="clarify_insert.label.id"></label>
-      <input type="text" class="msg-field" id="node-input-signalId" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalName"><span data-i18n="clarify_insert.label.name"></label>
-      <input type="text" class="msg-field" id="node-input-signalName" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalType"><span data-i18n="clarify_insert.label.type"></label>
-      <input type="text" class="msg-field" id="node-input-signalType" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalDescription"><span data-i18n="clarify_insert.label.description"></label>
-      <input type="text" class="msg-field" id="node-input-signalDescription" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalLabels"><span data-i18n="clarify_insert.label.labels"></label>
-      <input type="text" class="msg-field" id="node-input-signalLabels" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalAnnotations"><span data-i18n="clarify_insert.label.annotations"></label>
-      <input type="text" class="msg-field" id="node-input-signalAnnotations" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalEngUnit"><span data-i18n="clarify_insert.label.engUnit"></label>
-      <input type="text" class="msg-field" id="node-input-signalEngUnit" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalEnumValues"><span data-i18n="clarify_insert.label.enumValues"></label>
-      <input type="text" class="msg-field" id="node-input-signalEnumValues" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalSourceType"><span data-i18n="clarify_insert.label.sourceType"></label>
-      <input type="text" class="msg-field" id="node-input-signalSourceType" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalSampleInterval"><span data-i18n="clarify_insert.label.sampleInterval"></label>
-      <input type="text" class="msg-field" id="node-input-signalSampleInterval" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalGapDetection"><span data-i18n="clarify_insert.label.gapDetection"></label>
-      <input type="text" class="msg-field" id="node-input-signalGapDetection" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalDataTimes"><span data-i18n="clarify_insert.label.dataTimes"></label>
-      <input type="text" class="msg-field" id="node-input-signalDataTimes" style="width:70%" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-signalDataSeries"><span data-i18n="clarify_insert.label.dataSeries"></label>
-      <input type="text" class="msg-field" id="node-input-signalDataSeries" style="width:70%" />
-    </div>
   </div>
 </script>

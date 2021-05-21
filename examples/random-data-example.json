@@ -1,38 +1,8 @@
 [
     {
-        "id": "fd854e1b.d7463",
-        "type": "clarify_insert",
-        "z": "3d4fe7a7.5ede48",
-        "name": "",
-        "apiRef": "715050d8.0a98a",
-        "signalId": "payload.id",
-        "signalName": "payload.name",
-        "signalType": "payload.type",
-        "signalDescription": "payload.description",
-        "signalLabels": "payload.labels",
-        "signalAnnotations": "payload.annotations",
-        "signalEngUnit": "payload.engUnit",
-        "signalEnumValues": "payload.enumValues",
-        "signalSourceType": "payload.sourceType",
-        "signalSampleInterval": "payload.sampleInterval",
-        "signalGapDetection": "payload.gapDetection",
-        "signalDataTimes": "payload.data.times",
-        "signalDataSeries": "payload.data.series",
-        "x": 1010,
-        "y": 540,
-        "wires": [
-            [
-                "abb34846.c4eaa8"
-            ],
-            [
-                "5fdc3161.a92c6"
-            ]
-        ]
-    },
-    {
-        "id": "ee32740.50e1f9",
+        "id": "745255b1.294e5c",
         "type": "inject",
-        "z": "3d4fe7a7.5ede48",
+        "z": "ff33c04b.48486",
         "name": "",
         "props": [
             {
@@ -50,36 +20,36 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 540,
-        "y": 540,
+        "x": 120,
+        "y": 240,
         "wires": [
             [
-                "866865e0.dcb3c8"
+                "e5d7322.78383d"
             ]
         ]
     },
     {
-        "id": "866865e0.dcb3c8",
+        "id": "e5d7322.78383d",
         "type": "function",
-        "z": "3d4fe7a7.5ede48",
+        "z": "ff33c04b.48486",
         "name": "Generate data",
-        "func": "let now = msg.payload;\nmsg.payload = {};\nmsg.payload.id = \"your-first-signal-id\";\nmsg.payload.name = \"Random Signal 1\";\nmsg.payload.data = {\n    \"times\": [new Date(now).toISOString()],\n    \"series\": [Math.floor(Math.random() * 101)],\n    \n};\nreturn msg;",
+        "func": "let now = msg.payload;\nreturn {\n    topic: 'your-first-signal-id',\n    signal: {\n        name: 'Random Signal 1',\n        type: 'numeric',\n        description: 'Your first signal',\n    },\n    payload: {\n        times: [new Date(now).toISOString()],\n        values: [Math.floor(Math.random() * 101)],\n    },\n};",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "x": 800,
-        "y": 540,
+        "x": 380,
+        "y": 240,
         "wires": [
             [
-                "fd854e1b.d7463"
+                "8f632e95.b9d4c"
             ]
         ]
     },
     {
-        "id": "abb34846.c4eaa8",
+        "id": "63cbca34.25d774",
         "type": "debug",
-        "z": "3d4fe7a7.5ede48",
+        "z": "ff33c04b.48486",
         "name": "Result",
         "active": true,
         "tosidebar": true,
@@ -89,14 +59,14 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1210,
-        "y": 480,
+        "x": 790,
+        "y": 180,
         "wires": []
     },
     {
-        "id": "5fdc3161.a92c6",
+        "id": "a60c1d97.8f188",
         "type": "debug",
-        "z": "3d4fe7a7.5ede48",
+        "z": "ff33c04b.48486",
         "name": "Errors",
         "active": true,
         "tosidebar": true,
@@ -106,13 +76,26 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1210,
-        "y": 560,
+        "x": 790,
+        "y": 260,
         "wires": []
     },
     {
-        "id": "715050d8.0a98a",
-        "type": "clarify_api",
-        "name": ""
+        "id": "8f632e95.b9d4c",
+        "type": "clarify_insert",
+        "z": "ff33c04b.48486",
+        "name": "",
+        "apiRef": "",
+        "bufferTime": "5",
+        "x": 560,
+        "y": 240,
+        "wires": [
+            [
+                "63cbca34.25d774"
+            ],
+            [
+                "a60c1d97.8f188"
+            ]
+        ]
     }
 ]
