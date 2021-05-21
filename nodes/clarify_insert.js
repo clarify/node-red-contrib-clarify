@@ -50,7 +50,7 @@ module.exports = function (RED) {
           if (!(t in node.dataBuffer)) {
             node.dataBuffer[t] = {};
           }
-          node.dataBuffer[t][id] = data.series[i];
+          node.dataBuffer[t][id] = data.values[i];
         });
         release();
       });
@@ -161,7 +161,7 @@ module.exports = function (RED) {
       // Validate incoming id. Must be correct to continue
       var id;
       try {
-        id = RED.util.getMessageProperty(msg, config.signalId);
+        id = RED.util.getMessageProperty(msg, 'topic');
       } catch (e) {
         let errMsg = 'unable to read payload';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
@@ -179,7 +179,7 @@ module.exports = function (RED) {
       // Get incoming signal and validate it.
       var signal;
       try {
-        signal = util.prepareSignal(RED, msg, config);
+        signal = util.prepareSignal(RED, msg);
       } catch (e) {
         let errMsg = 'Invalid signal: ' + id;
         node.status({fill: 'red', shape: 'ring', text: errMsg});
@@ -201,14 +201,14 @@ module.exports = function (RED) {
       let integrationId = node.api.credentials.integrationId;
       let savedSignal = node.signalStore.find({id: id, integrationId: integrationId}).value();
 
-      if (this.debug || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data)) {
+      if (!_.isEmpty(signal) && (this.debug || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data))) {
         node.addEnsureToBuffer(id, signal);
         node.flushEnsureBuffer();
       }
 
       var data;
       try {
-        data = util.prepareData(RED, msg, config);
+        data = util.prepareData(RED, msg);
       } catch (e) {
         let errMsg = 'Invalid data: ' + id;
         node.status({fill: 'red', shape: 'ring', text: errMsg});

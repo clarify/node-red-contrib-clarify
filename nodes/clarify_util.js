@@ -32,39 +32,38 @@ module.exports = {
     return data;
   },
 
-  prepareData: function (RED, msg, config) {
-    let times = null;
-    try {
-      times = RED.util.getMessageProperty(msg, config.signalDataTimes);
-    } catch (e) {}
-
-    let series = null;
-    try {
-      series = RED.util.getMessageProperty(msg, config.signalDataSeries);
-    } catch (e) {}
-
-    if (times === null && series === null) {
+  prepareData: function (RED, msg) {
+    let payload = RED.util.getMessageProperty(msg, 'payload');
+    if (payload === undefined) {
       return null;
     }
 
-    if (!Array.isArray(times)) {
-      throw 'dataTimes must be array';
+    if (typeof payload !== 'object') {
+      throw 'msg.payload must be object';
     }
 
-    if (!Array.isArray(series)) {
-      throw 'dataSeries must be array';
+    if (_.isEmpty(payload)) {
+      throw 'msg.payload can not be empty';
     }
 
-    if (times.length != series.length) {
-      throw 'length of dataTimes and dataSeries must be equal';
+    if (!Array.isArray(payload.times)) {
+      throw 'payload.times must be array';
     }
 
-    if (!_.every(series, _.isNumber)) {
-      throw 'dataSeries can only be consist of numbers';
+    if (!Array.isArray(payload.values)) {
+      throw 'payload.values must be array';
+    }
+
+    if (payload.times.length != payload.values.length) {
+      throw 'length of payload.times and payload.values must be equal';
+    }
+
+    if (!_.every(payload.values, _.isNumber)) {
+      throw 'payload.values can only be consist of numbers';
     }
 
     let _times = [];
-    times.forEach(t => {
+    payload.times.forEach(t => {
       // Normalize times to RFC3339 times in UTC.
       let dt = DateTime.fromISO(t);
       if (!dt.isValid) {
@@ -76,49 +75,40 @@ module.exports = {
 
     return {
       times: _times,
-      series: series,
+      values: payload.values,
     };
   },
 
-  prepareSignal: function (RED, msg, config) {
-    let name = RED.util.getMessageProperty(msg, config.signalName);
-    let type = RED.util.getMessageProperty(msg, config.signalType);
-    let description = RED.util.getMessageProperty(msg, config.signalDescription);
-    let engUnit = RED.util.getMessageProperty(msg, config.signalEngUnit);
-    let labels = RED.util.getMessageProperty(msg, config.signalLabels);
-    let annotations = RED.util.getMessageProperty(msg, config.signalAnnotations);
-    let enumValues = RED.util.getMessageProperty(msg, config.signalEnumValues);
-    let sourceType = RED.util.getMessageProperty(msg, config.signalSourceType);
-    let sampleInterval = RED.util.getMessageProperty(msg, config.signalSampleInterval);
-    let gapDetection = RED.util.getMessageProperty(msg, config.signalGapDetection);
+  prepareSignal: function (RED, msg) {
+    let signal = RED.util.getMessageProperty(msg, 'signal');
+    if (signal === undefined) {
+      return {};
+    }
+
+    if (typeof signal !== 'object') {
+      throw 'msg.signal must be object';
+    }
+
+    if (_.isEmpty(signal)) {
+      throw 'msg.signal can not be empty';
+    }
 
     let validationErrors = [];
-    validateString(validationErrors, 'name', name);
-    validateStringEnum(validationErrors, 'type', type, ['enum', 'numeric']);
-    validateString(validationErrors, 'description', description);
-    validateMapStringWithStrings(validationErrors, 'labels', labels);
-    validateMapStringWithString(validationErrors, 'annotations', annotations);
-    validateMapIntWithString(validationErrors, 'enumValues', enumValues);
-    validateString(validationErrors, 'engUnit', engUnit);
-    validateStringEnum(validationErrors, 'sourceType', sourceType, ['aggregation', 'measurement', 'prediction']);
-    validateStringRFC3339(validationErrors, 'sampleInterval', sampleInterval);
-    validateStringRFC3339(validationErrors, 'gapDetection', gapDetection);
+    validateString(validationErrors, 'name', signal.name);
+    validateStringEnum(validationErrors, 'type', signal.type, ['enum', 'numeric']);
+    validateString(validationErrors, 'description', signal.description);
+    validateMapStringWithStrings(validationErrors, 'labels', signal.labels);
+    validateMapStringWithString(validationErrors, 'annotations', signal.annotations);
+    validateMapIntWithString(validationErrors, 'enumValues', signal.enumValues);
+    validateString(validationErrors, 'engUnit', signal.engUnit);
+    validateStringEnum(validationErrors, 'sourceType', signal.sourceType, ['aggregation', 'measurement', 'prediction']);
+    validateStringRFC3339(validationErrors, 'sampleInterval', signal.sampleInterval);
+    validateStringRFC3339(validationErrors, 'gapDetection', signal.gapDetection);
 
     if (validationErrors.length > 0) {
       throw validationErrors.join('\n');
     }
 
-    let signal = {};
-    assignIfDefined(signal, 'name', name);
-    assignIfDefined(signal, 'type', type);
-    assignIfDefined(signal, 'description', description);
-    assignIfDefined(signal, 'labels', labels);
-    assignIfDefined(signal, 'annotations', annotations);
-    assignIfDefined(signal, 'engUnit', engUnit);
-    assignIfDefined(signal, 'enumValues', enumValues);
-    assignIfDefined(signal, 'sourceType', sourceType);
-    assignIfDefined(signal, 'sampleInterval', sampleInterval);
-    assignIfDefined(signal, 'gapDetection', gapDetection);
     return signal;
   },
 };
