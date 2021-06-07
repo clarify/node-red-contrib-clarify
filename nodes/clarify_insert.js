@@ -158,6 +158,13 @@ module.exports = function (RED) {
     };
 
     this.on('input', async function (msg, send, done) {
+      if (!node.api.isCredentialsValid()) {
+        let errMsg = 'credentials missing/invalid';
+        node.status({fill: 'red', shape: 'ring', text: errMsg});
+        done(`${errMsg}`);
+        return;
+      }
+
       // Validate incoming id. Must be correct to continue
       var id;
       try {

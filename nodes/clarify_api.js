@@ -1,4 +1,5 @@
 module.exports = function (RED) {
+  var _ = require('lodash');
   var qs = require('qs');
   const axios = require('axios').default;
   var url = require('url');
@@ -84,6 +85,27 @@ module.exports = function (RED) {
     };
 
     this.updateCredentials();
+
+    this.isCredentialsValid = function () {
+      if (_.isEmpty(this.credentials)) {
+        return false;
+      }
+      if (
+        !this.credentials.apiUrl ||
+        !this.credentials.clientId ||
+        !this.credentials.clientSecret ||
+        !this.credentials.integrationId
+      ) {
+        return false;
+      }
+
+      var accessTokenValid = false;
+      this.getAccessToken().then(token => {
+        accessTokenValid = true;
+      });
+
+      return true;
+    };
 
     this.tokenValid = function (accessToken) {
       return tokenValid(accessToken);
