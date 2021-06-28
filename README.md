@@ -24,3 +24,28 @@ You can find an example flow that shows how to use the insert node in `examples/
 ![Clarify Insert Node](https://github.com/searis/node-red-contrib-clarify/blob/master/examples/random-data-example.png?raw=true)
 
 Any questions? Send us an email on support@clarify.us
+
+## Changelog
+
+From 1.0.0 we will not do breaking changes to the overall msg.format. 
+
+### 1.0.0 - Breaking changes from -beta.X
+
+Updated the format of the messages according to this proposal: https://github.com/searis/node-red-contrib-clarify/issues/28
+
+- The Input ID is put in `msg.topic`
+- The signal meta data is moved out of the payload to `msg.signal`
+- `msg.payload.series` is renamed to `msg.payload.values`
+
+New message format:
+```json
+msg:
+  topic: "<Input ID>"
+  payload:
+    times: ["<timestamp>", ...]
+    values: [(<number>||null), ...]
+  signal: <Signal> # Match https://docs.clarify.us/reference#signal
+  ```
+
+### 1.0.0-beta.X
+Before 1.0.0 the nodes were undergoing development.
