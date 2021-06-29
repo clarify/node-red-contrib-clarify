@@ -45,7 +45,7 @@ Updated the format of the messages according to this proposal: https://github.co
 - `msg.payload.data.series` is renamed/moved to `msg.payload.values`
 
 New message format:
-```json
+```js
 msg:
   topic: "<Input ID>"
   payload:
