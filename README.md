@@ -25,9 +25,15 @@ You can find an example flow that shows how to use the insert node in `examples/
 
 Any questions? Send us an email on support@clarify.us
 
+## Backwards compatibility
+
+From v1.0.0-beta.4 we do not expect to do any breaking changes to the insert node input message format. However we might add new optional fields.
+
+As for the insert node _output_ message format, development is still ongoing, and breaking changes must be expected before the final v1.0.0 release. The number of outputs may also change.
+
 ## Changelog
 
-From 1.0.0 we will not do breaking changes to the overall msg.format. 
+The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from  `v.1.0.0-beta.3`.
 
 ### 1.0.0 - Breaking changes from -beta.X
 
