@@ -51,7 +51,7 @@ msg:
   payload:
     times: ["<timestamp>", ...]
     values: [(<number>||null), ...]
-  signal: <Signal> # Match https://docs.clarify.us/reference#signal
+  signal: <Signal> // Match https://docs.clarify.us/reference#signal
   ```
 
 ### 1.0.0-beta.X
