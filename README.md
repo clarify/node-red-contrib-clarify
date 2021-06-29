@@ -35,7 +35,7 @@ As for the insert node _output_ message format, development is still ongoing, an
 
 The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from  `v.1.0.0-beta.3`.
 
-### 1.0.0 - Breaking changes from -beta.X
+### 1.0.0-beta.4 - Breaking changes from -beta.3
 
 Updated the format of the messages according to this proposal: https://github.com/searis/node-red-contrib-clarify/issues/28
 
@@ -53,6 +53,3 @@ msg:
     values: [(<number>||null), ...]
   signal: <Signal> // Match https://docs.clarify.us/reference#signal
   ```
-
-### 1.0.0-beta.X
-Before 1.0.0 the nodes were undergoing development.
