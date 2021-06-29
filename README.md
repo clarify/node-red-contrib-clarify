@@ -41,7 +41,8 @@ Updated the format of the messages according to this proposal: https://github.co
 
 - The Input ID is put in `msg.topic`
 - The signal meta data is moved out of the payload to `msg.signal`
-- `msg.payload.series` is renamed to `msg.payload.values`
+- `msg.payload.data.times` is renamed/moved to `msg.payload.times`
+- `msg.payload.data.series` is renamed/moved to `msg.payload.values`
 
 New message format:
 ```json
