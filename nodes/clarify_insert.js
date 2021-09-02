@@ -158,6 +158,12 @@ module.exports = function (RED) {
     };
 
     this.on('input', async function (msg, send, done) {
+      if (node.api === null) {
+        let errMsg = 'missing api configuration';
+        node.status({fill: 'red', shape: 'ring', text: errMsg});
+        done(`${errMsg}`);
+        return;
+      }
       if (!node.api.isCredentialsValid()) {
         let errMsg = 'credentials missing/invalid';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
