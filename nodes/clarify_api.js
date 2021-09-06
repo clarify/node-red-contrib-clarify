@@ -6,11 +6,7 @@ module.exports = function (RED) {
   var jwtDecode = require('jwt-decode');
   const {DateTime} = require('luxon');
 
-  const low = require('lowdb');
-  const FileSync = require('lowdb/adapters/FileSync');
-
-  const adapter = new FileSync(RED.settings.userDir + '/clarify_db.json');
-  const db = low(adapter);
+  const ClarifyDbLegacy = require('./clarify_db.js');
 
   const packageInfo = require('../package.json');
   const userAgent = `${packageInfo['name']}/${packageInfo['version']}`;
@@ -18,13 +14,9 @@ module.exports = function (RED) {
   function ClarifyApiNode(config) {
     RED.nodes.createNode(this, config);
 
-    this.db = db;
-    var nodeContext = this.context();
+    this.db = new ClarifyDbLegacy(RED.settings.userDir);
 
-    db.defaults({
-      signals: [],
-      nodes: [],
-    }).write();
+    var nodeContext = this.context();
 
     this.updateCredentials = function () {
       if (this.credentials.credentialsFile !== undefined) {
@@ -398,7 +390,7 @@ module.exports = function (RED) {
     let node = RED.nodes.getNode(req.query.id);
     if (node) {
       let integrationId = node.credentials.integrationId;
-      let signalsRemoved = node.db.get('signals').remove({integrationId: integrationId}).write();
+      let signalsRemoved = node.db.removeAllByIntegrationId(integrationId);
       out.msg = `Removed ${signalsRemoved.length} signals`;
       out.cleared = true;
     } else {
