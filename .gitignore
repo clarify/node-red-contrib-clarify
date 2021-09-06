@@ -39,15 +39,3 @@ node_modules
 
 # OSX
 .DS_Store
-
-# Node-RED
-.config.json
-.sessions.json
-*json.backup
-*_cred.json
-
-flows_*
-tmp
-
-local-userdir
-package-lock.json
