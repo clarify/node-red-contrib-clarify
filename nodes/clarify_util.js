@@ -54,6 +54,14 @@ module.exports = {
       throw 'payload.values must be array';
     }
 
+    if (_.isEmpty(payload.times)) {
+      throw 'msg.payload.times can not be empty';
+    }
+
+    if (_.isEmpty(payload.values)) {
+      throw 'msg.payload.values can not be empty';
+    }
+
     if (payload.times.length != payload.values.length) {
       throw 'length of payload.times and payload.values must be equal';
     }
