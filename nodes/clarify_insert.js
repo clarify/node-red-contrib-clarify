@@ -10,7 +10,6 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
 
     this.api = RED.nodes.getNode(config.apiRef);
-    this.signalStore = this.api.db.get('signals');
 
     this.reporting = null;
     this.reportingTime = 500;
@@ -133,13 +132,14 @@ module.exports = function (RED) {
 
                   for (id in signalsByInput) {
                     let integrationId = node.api.credentials.integrationId;
-                    let savedSignal = node.signalStore.find({id: id, integrationId: integrationId}).value();
+                    let savedSignal = node.api.db.findSignal(integrationId, id);
                     let signal = ensureBuffer[id];
+                    let signalHashed = util.hashSignal(signal);
 
                     if (savedSignal) {
-                      node.signalStore.find({id: id, integrationId: integrationId}).assign({data: signal}).write();
+                      node.api.db.patchSignal(integrationId, id, signalHashed);
                     } else {
-                      node.signalStore.push({id: id, integrationId: integrationId, data: signal}).write();
+                      node.api.db.createSignal(integrationId, id, signalHashed);
                     }
                   }
                   node.ensureError = false;
@@ -212,9 +212,10 @@ module.exports = function (RED) {
       }
 
       let integrationId = node.api.credentials.integrationId;
-      let savedSignal = node.signalStore.find({id: id, integrationId: integrationId}).value();
+      let savedSignal = node.api.db.findSignal(integrationId, id);
+      let signalHashed = util.hashSignal(signal);
 
-      if (!_.isEmpty(signal) && (this.debug || !savedSignal || !RED.util.compareObjects(signal, savedSignal.data))) {
+      if (!_.isEmpty(signal) && (this.debug || !savedSignal || signalHashed != savedSignal.hash)) {
         node.addEnsureToBuffer(id, signal);
         node.flushEnsureBuffer();
       }

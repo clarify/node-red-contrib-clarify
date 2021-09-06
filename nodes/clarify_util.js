@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var CryptoJS = require('crypto-js');
 const {DateTime, Duration} = require('luxon');
 
 const keyPattern = /^[a-zA-Z0-9_/-]{1,40}$/;
@@ -118,6 +119,10 @@ module.exports = {
     }
 
     return signal;
+  },
+
+  hashSignal(signal) {
+    return CryptoJS.SHA1(JSON.stringify(signal)).toString();
   },
 };
 
