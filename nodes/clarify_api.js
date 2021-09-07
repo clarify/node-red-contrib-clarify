@@ -108,6 +108,7 @@ module.exports = function (RED) {
       return DateTime.fromSeconds(decoded.exp).toRelative();
     };
 
+    this.requestingAccessToken = true;
     this.getAccessToken = async function (insertNode) {
       var node = this;
 
@@ -117,6 +118,19 @@ module.exports = function (RED) {
           resolve(accessToken);
           return;
         }
+
+        if (this.requestingAccessToken) {
+          return new Promise(resolve => {
+            setTimeout(function () {
+              resolve(nodeContext.get('accessToken'));
+            }, 1000);
+          });
+        }
+
+        this.requestingAccessToken = true;
+        setTimeout(function () {
+          this.requestingAccessToken = false;
+        }, 1000);
 
         if (insertNode !== undefined) {
           insertNode.status('fetching new token');
@@ -136,6 +150,7 @@ module.exports = function (RED) {
         axios(options)
           .then(response => {
             nodeContext.set('accessToken', response.data.access_token);
+            this.requestingAccessToken = false;
             resolve(response.data.access_token);
           })
           .catch(error => {
