@@ -10,7 +10,7 @@
           value: '5',
           required: true,
           validate: function (v) {
-            return RED.validators.number(v) && v >= 1;
+            return RED.validators.number(v) && v > 1;
           },
         },
       },
@@ -42,7 +42,7 @@
   </div>
   <div class="form-row">
     <label for="node-input-bufferTime"><i class="fa fa-clock-o"></i> <span data-i18n="clarify_insert.label.bufferTime"></span></label>
-    <input type="number" id="node-input-bufferTime" min="1" style="text-align:end; width:100px !important">
+    <input type="number" id="node-input-bufferTime" min="2" style="text-align:end; width:100px !important">
     <label for="label"><span data-i18n="clarify_insert.label.secs"></label>
   </div>
 </script>
