@@ -122,7 +122,7 @@ module.exports = {
   },
 
   hashSignal(signal) {
-    return CryptoJS.SHA1(JSON.stringify(signal)).toString();
+    return CryptoJS.MD5(JSON.stringify(signal)).toString();
   },
 };
 
