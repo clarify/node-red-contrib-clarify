@@ -13,12 +13,12 @@ module.exports = class ClarifyDb {
 
   constructor(userDir) {
     this.folderName = userDir + '/clarify-db';
-    this.#createDbFolder(this.folderName);
+    this.createDbFolder(this.folderName);
 
-    this.#deletePreviousVersions(userDir);
+    this.deletePreviousVersions(userDir);
   }
 
-  #createDbFolder(folderName) {
+  createDbFolder(folderName) {
     try {
       if (!fs.existsSync(folderName)) {
         fs.mkdirSync(folderName);
@@ -28,7 +28,7 @@ module.exports = class ClarifyDb {
     }
   }
 
-  #deletePreviousVersions(userDir) {
+  deletePreviousVersions(userDir) {
     // previousVersions contains a list of all previous known versions of this database.
     let previousVersions = [userDir + '/clarify_db.json'];
     previousVersions.forEach(path => {
