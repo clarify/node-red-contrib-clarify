@@ -78,7 +78,7 @@ module.exports = function (RED) {
 
     this.updateCredentials();
 
-    this.isCredentialsValid = async function () {
+    this.isCredentialsValid = async function (insertNode) {
       if (_.isEmpty(this.credentials)) {
         return false;
       }
@@ -92,7 +92,7 @@ module.exports = function (RED) {
       }
 
       var accessTokenValid = false;
-      await this.getAccessToken().then(token => {
+      await this.getAccessToken(insertNode).then(token => {
         accessTokenValid = true;
       });
 
@@ -108,7 +108,7 @@ module.exports = function (RED) {
       return DateTime.fromSeconds(decoded.exp).toRelative();
     };
 
-    this.getAccessToken = async function () {
+    this.getAccessToken = async function (insertNode) {
       var node = this;
 
       return new Promise(function (resolve, reject) {
@@ -116,6 +116,10 @@ module.exports = function (RED) {
         if (accessToken && tokenValid(accessToken)) {
           resolve(accessToken);
           return;
+        }
+
+        if (insertNode !== undefined) {
+          insertNode.status('fetching new token');
         }
 
         var options = {
