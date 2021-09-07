@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var Mutex = require('async-mutex').Mutex;
+const {DateTime} = require('luxon');
 
 const clarifyInputIdRegEx = /^[a-z0-9_-]{1,40}$/;
 
@@ -24,8 +25,7 @@ module.exports = function (RED) {
     this.dataError = false;
     this.dataBuffering = null;
     this.dataBufferMutex = new Mutex();
-    // Flush data buffer a bit later than meta data
-    this.dataBufferTime = this.bufferTime + 500;
+    this.dataBufferTime = this.bufferTime;
 
     this.debug = false;
 
@@ -34,6 +34,9 @@ module.exports = function (RED) {
     this.ensureBuffering = null;
     this.ensureBufferMutex = new Mutex();
     this.ensureBufferTime = this.bufferTime;
+
+    // nextEnsureFlush is the estimated time (as DateTime object) the ensure flush operation is executed.
+    this.nextEnsureFlush = null;
 
     var node = this;
     node.addEnsureToBuffer = function (id, signal) {
@@ -81,6 +84,18 @@ module.exports = function (RED) {
 
     node.flushDataBuffer = function () {
       if (!node.dataBuffering) {
+        var dataBufferTime = node.dataBufferTime;
+        // If the ensureBuffer flush operation is in operation we want to flush the data
+        // a certain time after, defined by bufferFlushDifference.
+        if (node.nextEnsureFlush !== null) {
+          try {
+            dataBufferTime = adjustDataBufferTime(node.nextEnsureFlush, node.dataBufferTime);
+          } catch (e) {
+            node.dataError = true;
+            node.send([null, {error: e}]);
+          }
+        }
+
         node.dataBuffering = setTimeout(function () {
           node.dataBufferMutex
             .acquire()
@@ -106,12 +121,14 @@ module.exports = function (RED) {
             });
 
           node.dataBuffering = null;
-        }, this.dataBufferTime);
+        }, dataBufferTime);
       }
     };
 
     node.flushEnsureBuffer = function () {
       if (!node.ensureBuffering) {
+        node.nextEnsureFlush = DateTime.utc().plus({millisecond: node.ensureBufferTime});
+
         node.ensureBuffering = setTimeout(function () {
           node.ensureBufferMutex
             .acquire()
@@ -152,8 +169,9 @@ module.exports = function (RED) {
               node.reportBuffer();
             });
 
+          node.nextEnsureFlush = null;
           node.ensureBuffering = null;
-        }, this.ensureBufferTime);
+        }, node.ensureBufferTime);
       }
     };
 
@@ -247,3 +265,29 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('clarify_insert', ClarifyInsertNode);
 };
+
+// bufferFlushDifference is the time in milliseconds between the ensure flush
+// operation and the data flush operation, added to the data flush operation to
+const bufferFlushDifference = 1000;
+
+// adjustDataBufferTime calculates a new data buffer time based on when the ensure flush operation is being executed.
+function adjustDataBufferTime(nextEnsureFlush, dataBufferTime) {
+  if (typeof nextEnsureFlush !== 'object') {
+    throw 'node.nextEnsureFlush is not an object';
+  }
+  if (!(nextEnsureFlush instanceof DateTime)) {
+    throw 'node.nextEnsureFlush is not an object';
+  }
+
+  let nextEnsureFlushInMs = nextEnsureFlush.diffNow().toObject().milliseconds;
+  if (nextEnsureFlushInMs < 0) {
+    throw 'node.nextEnsureFlush is not an object';
+  }
+
+  let adjustedDataBufferTime = bufferFlushDifference + Math.round(nextEnsureFlushInMs / 1000) * 1000;
+  if (adjustedDataBufferTime < dataBufferTime) {
+    return dataBufferTime;
+  }
+
+  return adjustedDataBufferTime;
+}
