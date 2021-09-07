@@ -69,7 +69,7 @@ module.exports = class ClarifyDb {
   }
 
   patchSignal(integrationId, inputId, hash) {
-    return this.getDb(integrationId).get('signals').find({inputId: inputId}).assign({hash: hash}).value();
+    return this.getDb(integrationId).get('signals').find({inputId: inputId}).assign({hash: hash}).write();
   }
 
   createSignal(integrationId, inputId, hash) {
