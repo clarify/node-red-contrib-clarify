@@ -183,7 +183,7 @@ module.exports = function (RED) {
         return;
       }
 
-      if (await !node.api.isCredentialsValid()) {
+      if (await !node.api.isCredentialsValid(node)) {
         let errMsg = 'credentials missing/invalid';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
         done(`${errMsg}`);
