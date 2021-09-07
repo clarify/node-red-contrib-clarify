@@ -78,7 +78,7 @@ module.exports = function (RED) {
 
     this.updateCredentials();
 
-    this.isCredentialsValid = function () {
+    this.isCredentialsValid = async function () {
       if (_.isEmpty(this.credentials)) {
         return false;
       }
@@ -92,11 +92,11 @@ module.exports = function (RED) {
       }
 
       var accessTokenValid = false;
-      this.getAccessToken().then(token => {
+      await this.getAccessToken().then(token => {
         accessTokenValid = true;
       });
 
-      return true;
+      return accessTokenValid;
     };
 
     this.tokenValid = function (accessToken) {
@@ -117,6 +117,7 @@ module.exports = function (RED) {
           resolve(accessToken);
           return;
         }
+
         var options = {
           method: 'POST',
           url: node.credentials.tokenUrl,
