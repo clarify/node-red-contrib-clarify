@@ -10,7 +10,7 @@
           value: '5',
           required: true,
           validate: function (v) {
-            return RED.validators.number(v) && v > 1;
+            return RED.validators.number(v) && v >= 5;
           },
         },
       },
