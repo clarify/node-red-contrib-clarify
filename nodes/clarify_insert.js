@@ -15,7 +15,7 @@ module.exports = function (RED) {
     this.reporting = null;
     this.reportingTime = 500;
 
-    if (config.bufferTime > 1) {
+    if (config.bufferTime >= 5) {
       this.bufferTime = config.bufferTime * 1000;
     } else {
       this.bufferTime = 5000;
@@ -269,7 +269,7 @@ module.exports = function (RED) {
 
 // bufferFlushDifference is the time in milliseconds between the ensure flush
 // operation and the data flush operation, added to the data flush operation to
-const bufferFlushDifference = 1000;
+const bufferFlushDifference = 2000;
 
 // adjustDataBufferTime calculates a new data buffer time based on when the ensure flush operation is being executed.
 function adjustDataBufferTime(nextEnsureFlush, dataBufferTime) {
