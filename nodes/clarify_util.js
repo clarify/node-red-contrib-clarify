@@ -210,6 +210,10 @@ function validateMapStringWithStrings(validationErrors, varName, variable) {
     if (!_.every(values, _.isString)) {
       validationErrors.push(varName + '.' + key + ' values must be an array of strings');
     }
+
+    if (values.includes('')) {
+      validationErrors.push(varName + '.' + key + ' values can not be empty strings.');
+    }
   }
 
   return validationErrors;
