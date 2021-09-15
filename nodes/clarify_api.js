@@ -2,7 +2,6 @@ module.exports = function (RED) {
   var _ = require('lodash');
   var qs = require('qs');
   const axios = require('axios').default;
-  var url = require('url');
   var jwtDecode = require('jwt-decode');
   const {DateTime} = require('luxon');
 
@@ -56,24 +55,16 @@ module.exports = function (RED) {
         this.credentials.integrationId = this.credentials.overrideIntegrationId;
       }
 
-      let url = new URL(this.credentials.apiUrl);
-      if (this.credentials.tokenUrl === undefined) {
-        switch (url.host) {
-          case 'api.clfy.io': // dev api (proxy)
-            this.credentials.tokenUrl = 'https://login.clarify.clfy.io/oauth/token';
-            break;
-          case 'api.clarify.us': // prod api (proxy)
-            this.credentials.tokenUrl = 'https://login.clarify.us/oauth/token';
-            break;
-        }
-      }
-
       if (this.credentials.audience === undefined) {
         this.credentials.audience = this.credentials.apiUrl;
       }
 
-      // Strip slash from apiUrl
+      // Strip slash from apiUrl (after apiUrl is used by audience)
       this.credentials.apiUrl = this.credentials.apiUrl.replace(/\/$/, '');
+
+      if (this.credentials.tokenUrl === undefined) {
+        this.credentials.tokenUrl = `${this.credentials.apiUrl}/oauth/token`;
+      }
     };
 
     this.updateCredentials();
