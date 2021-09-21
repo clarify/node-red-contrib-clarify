@@ -33,7 +33,12 @@ As for the insert node _output_ message format, development is still ongoing, an
 
 ## Changelog
 
-The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from  `v.1.0.0-beta.3`.
+The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from `v.1.0.0-beta.3`.
+
+### 1.0.0-beta.7
+
+- Minimum buffertime is 5 seconds
+- Use new endpoint for access tokens
 
 ### 1.0.0-beta.4 - Breaking changes from -beta.3
 
@@ -45,6 +50,7 @@ Updated the format of the messages according to this proposal: https://github.co
 - `msg.payload.data.series` is renamed/moved to `msg.payload.values`
 
 New message format:
+
 ```js
 msg:
   topic: "<Input ID>"
@@ -52,4 +58,4 @@ msg:
     times: ["<timestamp>", ...]
     values: [(<number>||null), ...]
   signal: <Signal> // Match https://docs.clarify.us/reference#signal
-  ```
+```
