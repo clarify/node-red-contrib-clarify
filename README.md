@@ -35,6 +35,10 @@ As for the insert node _output_ message format, development is still ongoing, an
 
 The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from `v.1.0.0-beta.3`.
 
+### 1.0.0-beta.8
+
+- Bugfix: reset mutex on http error in fetchToken
+
 ### 1.0.0-beta.7
 
 - Minimum buffertime is 5 seconds
