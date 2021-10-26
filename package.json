@@ -2,15 +2,15 @@
     "name": "@searis/node-red-contrib-clarify",
     "version": "1.0.0-beta.8",
     "description": "A Node-Red node to insert data into Clarify",
-    "repository": "git://github.com/searis/node-red-contrib-clarify.git",
+    "repository": "git://github.com/clarify/node-red-contrib-clarify.git",
     "directories": {
         "nodes": "./nodes",
         "examples": "./examples"
     },
     "author": {
-        "name": "Searis AS",
-        "email": "teknisk@searis.no",
-        "url": "https://searis.no"
+        "name": "Clarify",
+        "email": "teknisk@clarify.io",
+        "url": "https://clarify.io"
     },
     "license": "Apache-2.0",
     "licenses": [
