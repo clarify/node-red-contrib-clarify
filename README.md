@@ -1,7 +1,7 @@
 # node-red-contrib-clarify
 
 Node-Red Nodes for adding data to Clarify.
-Learn more about Clarify at: https://www.clarify.us
+Learn more about Clarify at: https://www.clarify.io
 
 Available nodes are:
 
@@ -23,7 +23,7 @@ You can find an example flow that shows how to use the insert node in `examples/
 
 ![Clarify Insert Node](https://github.com/clarify/node-red-contrib-clarify/blob/master/examples/random-data-example.png?raw=true)
 
-Any questions? Send us an email on support@clarify.us
+Any questions? Send us an email on support@clarify.io
 
 ## Backwards compatibility
 
