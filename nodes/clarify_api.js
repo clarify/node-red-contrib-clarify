@@ -5,7 +5,7 @@ module.exports = function (RED) {
   var jwtDecode = require('jwt-decode');
   const {DateTime} = require('luxon');
 
-  const ClarifyDbLegacy = require('./clarify_db.js');
+  const ClarifyDb = require('./clarify_db.js');
 
   const packageInfo = require('../package.json');
   const userAgent = `${packageInfo['name']}/${packageInfo['version']}`;
@@ -13,7 +13,7 @@ module.exports = function (RED) {
   function ClarifyApiNode(config) {
     RED.nodes.createNode(this, config);
 
-    this.db = new ClarifyDbLegacy(RED.settings.userDir);
+    this.db = new ClarifyDb(RED.settings.userDir);
 
     var nodeContext = this.context();
 
