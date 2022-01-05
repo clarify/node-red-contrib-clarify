@@ -35,6 +35,16 @@ As for the insert node _output_ message format, development is still ongoing, an
 
 The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from `v.1.0.0-beta.3`.
 
+### 1.0.0
+
+- Change outputs to only output data from Clarify servers.
+- Merged the two outputs from the insert block into one output. See node documentation for more information.
+- Change Clarify URLs from clarify.us to clarify.io.
+
+### 1.0.0-beta.9
+
+- Moved code from repo github.com/searis to github.com/clarify.
+
 ### 1.0.0-beta.8
 
 - Bugfix: reset mutex on http error in fetchToken
