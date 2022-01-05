@@ -241,9 +241,9 @@ module.exports = function (RED) {
     return req
       .then(response => {
         if (response.data.error) {
-          throw response;
+          throw response.data.error;
         }
-        return response;
+        return response.data;
       })
       .catch(error => {
         throw error;
@@ -296,9 +296,9 @@ module.exports = function (RED) {
     return req
       .then(response => {
         if (response.data.error) {
-          throw response;
+          throw response.data.error;
         }
-        return response;
+        return response.data;
       })
       .catch(error => {
         throw error;

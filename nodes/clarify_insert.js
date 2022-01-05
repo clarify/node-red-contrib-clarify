@@ -111,11 +111,11 @@ module.exports = function (RED) {
                 .insert(data)
                 .then(response => {
                   node.dataError = false;
-                  node.send([{payload: response}, null]);
+                  node.send([{payload: response, method: 'insert'}, null]);
                 })
                 .catch(error => {
                   node.dataError = true;
-                  node.send([null, {error: error, requestType: 'insert'}]);
+                  node.send([null, {error: error, method: 'insert'}]);
                 });
               node.reportBuffer();
             });
@@ -142,7 +142,7 @@ module.exports = function (RED) {
               node.api
                 .saveSignals(ensureBuffer)
                 .then(response => {
-                  let signalsByInput = _.get(response, 'data.result.signalsByInput');
+                  let signalsByInput = _.get(response, 'result.signalsByInput');
                   if (!signalsByInput) {
                     return;
                   }
@@ -160,11 +160,11 @@ module.exports = function (RED) {
                     }
                   }
                   node.ensureError = false;
-                  node.send([{payload: response}, null]);
+                  node.send([{payload: response, method: 'saveSignals'}, null]);
                 })
                 .catch(error => {
                   node.ensureError = true;
-                  node.send([null, {error: error, requestType: 'saveSignals'}]);
+                  node.send([null, {error: error, method: 'saveSignals'}]);
                 });
               node.reportBuffer();
             });
