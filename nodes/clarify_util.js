@@ -102,11 +102,11 @@ module.exports = {
     }
 
     if (typeof signal !== 'object') {
-      throw 'msg.signal must be object';
+      throw JSON.stringify(['msg.signal must be object']);
     }
 
     if (_.isEmpty(signal)) {
-      throw 'msg.signal can not be empty';
+      throw JSON.stringify(['msg.signal can not be empty']);
     }
 
     let validationErrors = [];
@@ -120,6 +120,24 @@ module.exports = {
     validateStringEnum(validationErrors, 'sourceType', signal.sourceType, ['aggregation', 'measurement', 'prediction']);
     validateStringRFC3339(validationErrors, 'sampleInterval', signal.sampleInterval);
     validateStringRFC3339(validationErrors, 'gapDetection', signal.gapDetection);
+
+    let allowedFields = [
+      'name',
+      'type',
+      'description',
+      'labels',
+      'annotations',
+      'enumValues',
+      'engUnit',
+      'sourceType',
+      'sampleInterval',
+      'gapDetection',
+    ];
+    Object.keys(signal).forEach(key => {
+      if (!allowedFields.includes(key)) {
+        validationErrors.push(`Element ${key} isn't allowed`);
+      }
+    });
 
     if (validationErrors.length > 0) {
       throw JSON.stringify(validationErrors);
