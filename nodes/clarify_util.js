@@ -39,48 +39,55 @@ module.exports = {
       return null;
     }
 
+    let validationErrors = [];
     if (typeof payload !== 'object') {
-      throw 'msg.payload must be object';
+      validationErrors.push('msg.payload must be object');
     }
 
     if (_.isEmpty(payload)) {
-      throw 'msg.payload can not be empty';
+      validationErrors.push('msg.payload can not be empty');
     }
 
     if (!Array.isArray(payload.times)) {
-      throw 'payload.times must be array';
+      validationErrors.push('payload.times must be array');
     }
 
     if (!Array.isArray(payload.values)) {
-      throw 'payload.values must be array';
+      validationErrors.push('payload.values must be array');
     }
 
     if (_.isEmpty(payload.times)) {
-      throw 'msg.payload.times can not be empty';
+      validationErrors.push('msg.payload.times can not be empty');
     }
 
     if (_.isEmpty(payload.values)) {
-      throw 'msg.payload.values can not be empty';
+      validationErrors.push('msg.payload.values can not be empty');
     }
 
     if (payload.times.length != payload.values.length) {
-      throw 'length of payload.times and payload.values must be equal';
+      validationErrors.push('length of payload.times and payload.values must be equal');
     }
 
     if (!_.every(payload.values, _.isNumber)) {
-      throw 'payload.values can only be consist of numbers';
+      validationErrors.push('payload.values can only consists of numbers');
     }
 
     let _times = [];
-    payload.times.forEach(t => {
-      // Normalize times to RFC3339 times in UTC.
-      let dt = DateTime.fromISO(t);
-      if (!dt.isValid) {
-        throw 'not valid RFC3339 time: ' + t;
-      }
+    if (Array.isArray(payload.times)) {
+      payload.times.forEach(t => {
+        // Normalize times to RFC3339 times in UTC.
+        let dt = DateTime.fromISO(t);
+        if (!dt.isValid) {
+          validationErrors.push('not valid RFC3339 time: ' + t);
+        }
 
-      _times.push(dt);
-    });
+        _times.push(dt);
+      });
+    }
+
+    if (validationErrors.length > 0) {
+      throw JSON.stringify(validationErrors);
+    }
 
     return {
       times: _times,
@@ -115,7 +122,7 @@ module.exports = {
     validateStringRFC3339(validationErrors, 'gapDetection', signal.gapDetection);
 
     if (validationErrors.length > 0) {
-      throw validationErrors.join('\n');
+      throw JSON.stringify(validationErrors);
     }
 
     return signal;
