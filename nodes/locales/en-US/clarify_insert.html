@@ -33,7 +33,20 @@
 
   <h3>Outputs</h3>
   <dl class="message-properties">
-      TBA
+    <dt>method <span class="property-type">string</span></dt>
+    <dd>Describe which RPC method is called.</dd>
+
+    <dt>statusCode <span class="property-type">number</span></dt>
+    <dd>The status code of the response, or the error code if the request could not be completed.</dd>
+
+    <dt>payload <span class="property-type">object</span></dt>
+    <dd>The body of the response.</dd>
+
+    <dt>headers <span class="property-type">string</span></dt>
+    <dd>An object containing the response headers.</dd>
+
+    <dt>errorType <span class="property-type">string</span></dt>
+    <dd>Type of error. Three possible error types exists; HTTP, Input, Request, and RPC.</dd>
   </dl>
 
   <h3>References</h3>

@@ -92,7 +92,7 @@ module.exports = function (RED) {
             dataBufferTime = adjustDataBufferTime(node.nextEnsureFlush, node.dataBufferTime);
           } catch (e) {
             node.dataError = true;
-            node.send([null, {error: e}]);
+            node.send({error: e});
           }
         }
 
@@ -111,11 +111,17 @@ module.exports = function (RED) {
                 .insert(data)
                 .then(response => {
                   node.dataError = false;
-                  node.send([{payload: response, method: 'insert'}, null]);
+                  node.send(response);
                 })
-                .catch(error => {
+                .catch(response => {
+                  // Extract error string from response and report it. By adding the remaining response data
+                  // as 2nd output can the message be catched by the CatchAll block in Node-RED.
+                  let err = response.error;
+                  delete response.error;
+                  node.error(err, response);
+
                   node.dataError = true;
-                  node.send([null, {error: error, method: 'insert'}]);
+                  node.send(response);
                 });
               node.reportBuffer();
             });
@@ -142,7 +148,7 @@ module.exports = function (RED) {
               node.api
                 .saveSignals(ensureBuffer)
                 .then(response => {
-                  let signalsByInput = _.get(response, 'result.signalsByInput');
+                  let signalsByInput = _.get(response, 'payload.result.signalsByInput');
                   if (!signalsByInput) {
                     return;
                   }
@@ -160,11 +166,18 @@ module.exports = function (RED) {
                     }
                   }
                   node.ensureError = false;
-                  node.send([{payload: response, method: 'saveSignals'}, null]);
+                  node.send(response);
                 })
-                .catch(error => {
+                .catch(response => {
                   node.ensureError = true;
-                  node.send([null, {error: error, method: 'saveSignals'}]);
+
+                  // Extract error string from response and report it. By adding the remaining response data
+                  // as 2nd output can the message be catched by the CatchAll block in Node-RED.
+                  let err = response.error;
+                  delete response.error;
+                  node.error(err, response);
+
+                  node.send(response);
                 });
               node.reportBuffer();
             });
@@ -215,7 +228,8 @@ module.exports = function (RED) {
       } catch (e) {
         let errMsg = 'Invalid signal: ' + id;
         node.status({fill: 'red', shape: 'ring', text: errMsg});
-        done(errMsg + '\n' + e);
+        node.error(errMsg, {payload: JSON.parse(e)});
+        node.send({errorType: 'Input', payload: JSON.parse(e)});
         return;
       }
 
@@ -245,8 +259,8 @@ module.exports = function (RED) {
       } catch (e) {
         let errMsg = 'Invalid data: ' + id;
         node.status({fill: 'red', shape: 'ring', text: errMsg});
-        errMsg += ':\n' + e;
-        done(errMsg);
+        node.error(errMsg, {payload: JSON.parse(e)});
+        node.send({errorType: 'Input', payload: JSON.parse(e)});
         return;
       }
 

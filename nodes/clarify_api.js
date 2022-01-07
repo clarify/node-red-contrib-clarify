@@ -198,10 +198,12 @@ module.exports = function (RED) {
   ClarifyApiNode.prototype.saveSignals = function (signals) {
     var node = this;
 
+    let method = 'integration.SaveSignals';
+
     var req = node.getAccessToken().then(token => {
       var req = {
         jsonrpc: '2.0',
-        method: 'integration.SaveSignals',
+        method: method,
         // TODO: Consider making pseudo-random string and verify that we receive the same one.
         id: 1,
         params: {
@@ -222,28 +224,17 @@ module.exports = function (RED) {
         },
         data: req,
       }).catch(error => {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          throw error.response;
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          throw error.request;
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          throw error.message;
-        }
+        throw normalizeOutput(error, method);
       });
     });
 
     return req
       .then(response => {
-        if (response.data.error) {
-          throw response.data.error;
+        let output = normalizeOutput(response, method);
+        if (output.error) {
+          throw output;
         }
-        return response.data;
+        return output;
       })
       .catch(error => {
         throw error;
@@ -253,10 +244,12 @@ module.exports = function (RED) {
   ClarifyApiNode.prototype.insert = function (data) {
     var node = this;
 
+    let method = 'integration.Insert';
+
     var req = node.getAccessToken().then(token => {
       var req = {
         jsonrpc: '2.0',
-        method: 'integration.Insert',
+        method: method,
         // TODO: Consider making pseudo-random string and verify that we receive the same one.
         id: 1,
         params: {
@@ -277,28 +270,17 @@ module.exports = function (RED) {
         },
         data: req,
       }).catch(error => {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          throw error.response;
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          throw error.request;
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          throw error.message;
-        }
+        throw normalizeOutput(error, method);
       });
     });
 
     return req
       .then(response => {
-        if (response.data.error) {
-          throw response.data.error;
+        let output = normalizeOutput(response, method);
+        if (output.error) {
+          throw output;
         }
-        return response.data;
+        return output;
       })
       .catch(error => {
         throw error;
@@ -412,3 +394,50 @@ module.exports = function (RED) {
     res.json(out);
   });
 };
+
+function normalizeOutput(response, method) {
+  out = {
+    method: method,
+  };
+
+  if (response.headers) {
+    out.headers = response.headers;
+  }
+
+  if (response.data) {
+    out.payload = response.data;
+  }
+
+  if (response.status) {
+    out.statusCode = response.status;
+  }
+
+  // Check if an error is detected. If so; try to represent it as a string together with type.
+  if (response.isAxiosError) {
+    out.errorType = 'Request';
+    out.payload = response.toJSON();
+    if (out.payload.name) {
+      out.error = out.payload.name;
+      if (out.payload.message) {
+        out.error += ` - ${out.payload.message}`;
+      }
+    } else {
+      out.error = response.toJSON();
+    }
+  } else if (response.status != 200) {
+    out.errorType = 'HTTP';
+    if (response.data) {
+      out.error = response.data;
+    } else {
+      out.error = `${response.status} - ${response.statusStatus}`;
+    }
+  } else if (response.data && response.data.error) {
+    out.errorType = 'RPC';
+    out.error = JSON.stringify(response.data.error);
+    if (response.data.error.message) {
+      out.error = response.data.error.message;
+    }
+  }
+
+  return out;
+}
