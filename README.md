@@ -8,7 +8,7 @@ Available nodes are:
 - clarify_insert: A node to create signals, update meta-data and insert data into Clarify.
 - clarify_api: A `configuration node` to establish connection to Clarify.
 
-![Clarify Insert Node](https://github.com/clarify/node-red-contrib-clarify/blob/master/examples/clarify-insert-node.png?raw=true)
+![Clarify Insert Node](https://github.com/clarify/node-red-contrib-clarify/blob/main/examples/clarify-insert-node.png?raw=true)
 
 This node will create a json-database to keep track of the signals and meta data written to Clarify.
 
@@ -21,7 +21,7 @@ If you are moving your node-red instance or creating backups, be sure to include
 
 You can find an example flow that shows how to use the insert node in `examples/random-data-example.json`. Please review the `Generate Data` function. Also remember to update the `clarify_api` configuration node with credentials downloaded from your integration in the Clarify Admin Panel.
 
-![Clarify Insert Node](https://github.com/clarify/node-red-contrib-clarify/blob/master/examples/random-data-example.png?raw=true)
+![Clarify Insert Node](https://github.com/clarify/node-red-contrib-clarify/blob/main/examples/random-data-example.png?raw=true)
 
 Any questions? Send us an email on support@clarify.io
 
