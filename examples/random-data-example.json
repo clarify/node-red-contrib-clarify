@@ -1,8 +1,16 @@
 [
     {
+        "id": "4c27d164c31527e6",
+        "type": "tab",
+        "label": "Flow 4",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "745255b1.294e5c",
         "type": "inject",
-        "z": "ff33c04b.48486",
+        "z": "4c27d164c31527e6",
         "name": "",
         "props": [
             {
@@ -20,8 +28,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 120,
-        "y": 240,
+        "x": 560,
+        "y": 460,
         "wires": [
             [
                 "e5d7322.78383d"
@@ -31,15 +39,16 @@
     {
         "id": "e5d7322.78383d",
         "type": "function",
-        "z": "ff33c04b.48486",
+        "z": "4c27d164c31527e6",
         "name": "Generate data",
         "func": "let now = msg.payload;\nreturn {\n    topic: 'your-first-signal-id',\n    signal: {\n        name: 'Random Signal 1',\n        type: 'numeric',\n        description: 'Your first signal',\n    },\n    payload: {\n        times: [new Date(now).toISOString()],\n        values: [Math.floor(Math.random() * 101)],\n    },\n};",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "x": 380,
-        "y": 240,
+        "libs": [],
+        "x": 800,
+        "y": 460,
         "wires": [
             [
                 "8f632e95.b9d4c"
@@ -49,7 +58,7 @@
     {
         "id": "63cbca34.25d774",
         "type": "debug",
-        "z": "ff33c04b.48486",
+        "z": "4c27d164c31527e6",
         "name": "Result",
         "active": true,
         "tosidebar": true,
@@ -59,43 +68,28 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 790,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "a60c1d97.8f188",
-        "type": "debug",
-        "z": "ff33c04b.48486",
-        "name": "Errors",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 790,
-        "y": 260,
+        "x": 1170,
+        "y": 460,
         "wires": []
     },
     {
         "id": "8f632e95.b9d4c",
         "type": "clarify_insert",
-        "z": "ff33c04b.48486",
+        "z": "4c27d164c31527e6",
         "name": "",
-        "apiRef": "",
+        "apiRef": "4bdd62fdfb87c09f",
         "bufferTime": "5",
-        "x": 560,
-        "y": 240,
+        "x": 1000,
+        "y": 460,
         "wires": [
             [
                 "63cbca34.25d774"
-            ],
-            [
-                "a60c1d97.8f188"
             ]
         ]
+    },
+    {
+        "id": "4bdd62fdfb87c09f",
+        "type": "clarify_api",
+        "name": "SAIVTEST @ SEARIS"
     }
 ]
