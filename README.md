@@ -15,7 +15,7 @@ This node will create a json-database to keep track of the signals and meta data
 This database will be stored in the default userDir. By default, this directory is a directory called `.node-red` under
 the user's home directory, but can be overriden in the `node-red-settings.js`.
 
-If you are moving your node-red instance or creating backups, be sure to include the folder `clarify_db/`.
+If you are moving your node-red instance or creating backups, be sure to include the folder `clarify-db/`.
 
 ## Examples
 
