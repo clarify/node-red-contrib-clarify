@@ -38,6 +38,15 @@ module.exports = {
     if (payload === undefined) {
       return null;
     }
+    // If the payload is a single number we treat is a real time measurement
+    // and add it to Clarify with the current timestamp.
+    if (_.isFinite(payload)) {
+      let val = payload;
+      payload = {
+        times: [DateTime.now().toString()],
+        values: [val],
+      };
+    }
 
     let validationErrors = [];
     if (typeof payload !== 'object') {
