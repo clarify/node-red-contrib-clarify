@@ -208,14 +208,14 @@ module.exports = function (RED) {
       try {
         id = RED.util.getMessageProperty(msg, 'topic');
       } catch (e) {
-        let errMsg = 'unable to read payload';
+        let errMsg = 'unable to read topic from message';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
         done(`${errMsg}: ${e}`);
         return;
       }
 
       if (id === undefined || !clarifyInputIdRegEx.test(id)) {
-        let errMsg = 'missing or invalid signal id';
+        let errMsg = 'missing or invalid signal id ([a-z0-9_-]{1,40})';
         node.status({fill: 'red', shape: 'ring', text: errMsg});
         done(`${errMsg}: ${id}`);
         return;
