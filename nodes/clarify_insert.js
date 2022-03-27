@@ -1,308 +1,271 @@
-var _ = require('lodash');
-var Mutex = require('async-mutex').Mutex;
-const {DateTime} = require('luxon');
+const Joi = require('joi');
+const {structureData, hashSignal} = require('./clarify_util');
 
 const clarifyInputIdRegEx = /^[a-zA-Z0-9-_:.#+/]{1,128}$/;
+const numbers = '\\d+(?:[\\.,]\\d+)?';
+const datePattern = `(${numbers}D)?`;
+const timePattern = `T(${numbers}H)?(${numbers}M)?(${numbers}S)?`;
+const duration = new RegExp(`^P(?:${datePattern}(?:${timePattern})?)$`);
+const keyPattern = /^[a-zA-Z0-9_/-]{1,40}$/;
+
+const SignalSchema = Joi.object({
+  name: Joi.string().max(100).required(),
+  type: Joi.string().valid('enum', 'numeric'),
+  description: Joi.string().max(1000),
+  engUnit: Joi.string().max(255),
+  sourceType: Joi.string().valid('aggregation', 'measurement', 'prediction'),
+  sampleInterval: Joi.string().regex(duration),
+  gapDetection: Joi.string().regex(duration),
+  labels: Joi.object().pattern(keyPattern, Joi.array().items(Joi.string())),
+  annotations: Joi.object().pattern(keyPattern, Joi.string()),
+});
+
+const PayloadSchema = Joi.object({
+  times: Joi.array().items(Joi.date().iso().cast('string'), Joi.date().timestamp().cast('string')),
+  values: Joi.array().items(Joi.number(), Joi.equal(null)),
+}).assert('times.length', Joi.ref('values.length'));
+
+const MessageSchema = Joi.object({
+  topic: Joi.string().regex(clarifyInputIdRegEx).required(),
+  signal: SignalSchema,
+  payload: PayloadSchema,
+});
+
+class DataBuffer {
+  constructor(timeout, flush) {
+    this.timeout = timeout;
+    this.flush = flush;
+    this.buffer = [];
+    this.flushTimer = null;
+  }
+
+  get length() {
+    return this.buffer.length;
+  }
+
+  cancel() {
+    if (this.flushTimer !== null) {
+      clearTimeout(this.flushTimer);
+      this.flushTimer = null;
+    }
+  }
+
+  add(data) {
+    this.buffer.push(data);
+    if (this.flushTimer === null) {
+      this.flushTimer = setTimeout(() => {
+        this.flushTimer = null;
+        let buffer = [...this.buffer];
+        this.buffer = [];
+        try {
+          this.flush(buffer);
+        } catch (error) {}
+      }, this.timeout);
+    }
+  }
+}
+
+function uniqueInputIds(dataBuffer) {
+  let inputIds = new Set();
+  for (let signal of dataBuffer.buffer) {
+    inputIds.add(signal.inputId);
+  }
+  return inputIds.size;
+}
+
+class ClarifyInsertReporter {
+  counts = {};
+  errors = {};
+
+  constructor(status) {
+    this.status = status;
+  }
+
+  setCount(name, count) {
+    this.counts[name] = count;
+    this.updateStatus();
+  }
+
+  setError(name, error) {
+    this.errors[name] = error;
+    this.updateStatus();
+  }
+
+  updateStatus() {
+    let errors = [];
+    for (let error of Object.values(this.errors)) {
+      if (error) {
+        errors.push(error);
+      }
+    }
+
+    if (errors.length) {
+      this.status({
+        fill: 'red',
+        shape: 'ring',
+        text: errors.join(', '),
+      });
+      return;
+    }
+
+    let values = [];
+    for (let [key, count] of Object.entries(this.counts)) {
+      if (count !== 0) {
+        values.push(`${key}: ${count}`);
+      }
+    }
+
+    if (values.length) {
+      this.status({
+        text: values.join(' | '),
+      });
+      return;
+    }
+
+    this.status({});
+  }
+}
 
 module.exports = function (RED) {
-  var util = require('./clarify_util');
-
   function ClarifyInsertNode(config) {
     RED.nodes.createNode(this, config);
 
-    this.api = RED.nodes.getNode(config.apiRef);
-
-    this.reporting = null;
-    this.reportingTime = 500;
-
-    if (config.bufferTime >= 5) {
-      this.bufferTime = config.bufferTime * 1000;
-    } else {
-      this.bufferTime = 5000;
-    }
-
-    this.dataBuffer = {};
-    this.dataError = false;
-    this.dataBuffering = null;
-    this.dataBufferMutex = new Mutex();
-    this.dataBufferTime = this.bufferTime;
-
-    this.debug = false;
-
-    this.ensureBuffer = {};
-    this.ensureError = false;
-    this.ensureBuffering = null;
-    this.ensureBufferMutex = new Mutex();
-    this.ensureBufferTime = this.bufferTime;
-
-    // nextEnsureFlush is the estimated time (as DateTime object) the ensure flush operation is executed.
-    this.nextEnsureFlush = null;
-
-    var node = this;
-    node.addEnsureToBuffer = function (id, signal) {
-      node.ensureBufferMutex.acquire().then(function (release) {
-        node.ensureBuffer[id] = signal;
-        release();
-      });
-    };
-
-    node.addDataToBuffer = function (id, data) {
-      node.ensureBufferMutex.acquire().then(function (release) {
-        data.times.forEach(function (t, i) {
-          if (!(t in node.dataBuffer)) {
-            node.dataBuffer[t] = {};
-          }
-          node.dataBuffer[t][id] = data.values[i];
-        });
-        release();
-      });
-    };
-
-    node.reportBuffer = function () {
-      if (!node.reporting) {
-        node.reporting = setTimeout(function () {
-          dataBufferLength = Object.keys(node.dataBuffer).length;
-          ensureBufferLength = Object.keys(node.ensureBuffer).length;
-
-          if (node.dataError || node.ensureError) {
-            let dataStatus = node.dataError ? 'error' : 'OK';
-            let ensureStatus = node.ensureError ? 'error' : 'OK';
-            let text = `Save: ${ensureStatus}, Insert: ${dataStatus}`;
-            node.status({fill: 'red', shape: 'ring', text: text});
-          } else if (dataBufferLength > 0 || ensureBufferLength > 0) {
-            let text = '#meta: ' + ensureBufferLength + '. #data: ' + dataBufferLength;
-            node.status({text: text});
-          } else if (node.debug) {
-            node.status({fill: 'yellow', shape: 'ring', text: 'Debug mode active'});
-          } else {
-            node.status({});
-          }
-          node.reporting = null;
-        }, node.reportingTime);
-      }
-    };
-
-    node.flushDataBuffer = function () {
-      if (!node.dataBuffering) {
-        var dataBufferTime = node.dataBufferTime;
-        // If the ensureBuffer flush operation is in operation we want to flush the data
-        // a certain time after, defined by bufferFlushDifference.
-        if (node.nextEnsureFlush !== null) {
-          try {
-            dataBufferTime = adjustDataBufferTime(node.nextEnsureFlush, node.dataBufferTime);
-          } catch (e) {
-            node.dataError = true;
-            node.send({error: e});
-          }
-        }
-
-        node.dataBuffering = setTimeout(function () {
-          node.dataBufferMutex
-            .acquire()
-            .then(function (release) {
-              dataBuffer = node.dataBuffer;
-              node.dataBuffer = {};
-              release();
-              return dataBuffer;
-            })
-            .then(function (dataBuffer) {
-              data = util.structureData(dataBuffer);
-              node.api
-                .insert(data)
-                .then(response => {
-                  node.dataError = false;
-                  node.send(response);
-                })
-                .catch(response => {
-                  // Extract error string from response and report it. By adding the remaining response data
-                  // as 2nd output can the message be catched by the CatchAll block in Node-RED.
-                  let err = response.error;
-                  delete response.error;
-                  node.error(err, response);
-
-                  node.dataError = true;
-                  node.send(response);
-                });
-              node.reportBuffer();
-            });
-
-          node.dataBuffering = null;
-        }, dataBufferTime);
-      }
-    };
-
-    node.flushEnsureBuffer = function () {
-      if (!node.ensureBuffering) {
-        node.nextEnsureFlush = DateTime.utc().plus({millisecond: node.ensureBufferTime});
-
-        node.ensureBuffering = setTimeout(function () {
-          node.ensureBufferMutex
-            .acquire()
-            .then(function (release) {
-              ensureBuffer = node.ensureBuffer;
-              node.ensureBuffer = {};
-              release();
-              return ensureBuffer;
-            })
-            .then(function (ensureBuffer) {
-              node.api
-                .saveSignals(ensureBuffer)
-                .then(response => {
-                  let signalsByInput = _.get(response, 'payload.result.signalsByInput');
-                  if (!signalsByInput) {
-                    return;
-                  }
-
-                  for (id in signalsByInput) {
-                    let integrationId = node.api.credentials.integrationId;
-                    let savedSignal = node.api.db.findSignal(integrationId, id);
-                    let signal = ensureBuffer[id];
-                    let signalHashed = util.hashSignal(signal);
-
-                    if (savedSignal) {
-                      node.api.db.patchSignal(integrationId, id, signalHashed);
-                    } else {
-                      node.api.db.createSignal(integrationId, id, signalHashed);
-                    }
-                  }
-                  node.ensureError = false;
-                  node.send(response);
-                })
-                .catch(response => {
-                  node.ensureError = true;
-
-                  // Extract error string from response and report it. By adding the remaining response data
-                  // as 2nd output can the message be catched by the CatchAll block in Node-RED.
-                  let err = response.error;
-                  delete response.error;
-                  node.error(err, response);
-
-                  node.send(response);
-                });
-              node.reportBuffer();
-            });
-
-          node.nextEnsureFlush = null;
-          node.ensureBuffering = null;
-        }, node.ensureBufferTime);
-      }
-    };
-
-    this.on('input', async function (msg, send, done) {
-      if (node.api === null) {
-        let errMsg = 'missing api configuration';
-        node.status({fill: 'red', shape: 'ring', text: errMsg});
-        done(`${errMsg}`);
-        return;
-      }
-
-      if (await !node.api.isCredentialsValid(node)) {
-        let errMsg = 'credentials missing/invalid';
-        node.status({fill: 'red', shape: 'ring', text: errMsg});
-        done(`${errMsg}`);
-        return;
-      }
-
-      // Validate incoming id. Must be correct to continue
-      var id;
-      try {
-        id = RED.util.getMessageProperty(msg, 'topic');
-      } catch (e) {
-        let errMsg = 'unable to read payload';
-        node.status({fill: 'red', shape: 'ring', text: errMsg});
-        done(`${errMsg}: ${e}`);
-        return;
-      }
-
-      if (id === undefined || !clarifyInputIdRegEx.test(id)) {
-        let errMsg = 'missing or invalid signal id';
-        node.status({fill: 'red', shape: 'ring', text: errMsg});
-        done(`${errMsg}: ${id}`);
-        return;
-      }
-
-      // Get incoming signal and validate it.
-      var signal;
-      try {
-        signal = util.prepareSignal(RED, msg);
-      } catch (e) {
-        let errMsg = 'Invalid signal: ' + id;
-        node.status({fill: 'red', shape: 'ring', text: errMsg});
-        node.error(errMsg, {payload: JSON.parse(e)});
-        node.send({errorType: 'Input', payload: JSON.parse(e)});
-        return;
-      }
-
-      try {
-        let debug = RED.util.getMessageProperty(msg, 'debug');
-        if (debug) {
-          this.debug = true;
-        }
-      } finally {
-        if (this.debug) {
-          node.reportBuffer();
-        }
-      }
-
-      let integrationId = node.api.credentials.integrationId;
-      let savedSignal = node.api.db.findSignal(integrationId, id);
-      let signalHashed = util.hashSignal(signal);
-
-      if (!_.isEmpty(signal) && (this.debug || !savedSignal || signalHashed != savedSignal.hash)) {
-        node.addEnsureToBuffer(id, signal);
-        node.flushEnsureBuffer();
-      }
-
-      var data;
-      try {
-        data = util.prepareData(RED, msg);
-      } catch (e) {
-        let errMsg = 'Invalid data: ' + id;
-        node.status({fill: 'red', shape: 'ring', text: errMsg});
-        node.error(errMsg, {payload: JSON.parse(e)});
-        node.send({errorType: 'Input', payload: JSON.parse(e)});
-        return;
-      }
-
-      if (data !== null) {
-        node.addDataToBuffer(id, data);
-        node.flushDataBuffer();
-      }
-
-      node.reportBuffer();
-
-      send(null);
-      done();
+    this.reporter = new ClarifyInsertReporter((...args) => {
+      this.status(...args);
     });
 
-    this.on('close', function () {});
+    let bufferTime = config.bufferTime >= 5 ? config.bufferTime * 1000 : 5000;
+
+    this.dataFrameBuffer = new DataBuffer(bufferTime, data => {
+      this.flushDataFramesBuffer(data);
+    });
+    this.saveSignalBuffer = new DataBuffer(bufferTime, data => {
+      this.flushSaveSignalBuffer(data);
+    });
+
+    this.api = RED.nodes.getNode(config.apiRef);
+
+    if (this.api && !this.api.client) {
+      this.status({fill: 'red', shape: 'ring', text: 'Credentails are invalid'});
+    }
+
+    this.on('input', (msg, send, done) => {
+      this.handleInput(msg, send, done);
+    });
+
+    this.on('close', () => {
+      this.dataFrameBuffer.cancel();
+      this.saveSignalBuffer.cancel();
+    });
   }
 
+  ClarifyInsertNode.prototype.handleInput = async function (msg, send, done) {
+    if (this.api === null || !this.api.client) {
+      let errorMessage = 'Missing API configuration';
+      this.status({fill: 'red', shape: 'ring', text: errorMessage});
+      done(errorMessage);
+      return;
+    }
+
+    let payload;
+    try {
+      payload = await MessageSchema.validateAsync({
+        topic: msg.topic,
+        signal: msg.signal,
+        payload: msg.payload,
+      });
+    } catch (error) {
+      this.status({fill: 'red', shape: 'ring', text: `${error}`});
+      done(`${error}`);
+      return;
+    }
+
+    let integrationId = this.api.integrationId;
+    let inputId = payload.topic;
+
+    if (payload.signal) {
+      let savedSignal = this.api.db.findSignal(integrationId, payload.topic);
+      let signalHashed = hashSignal(payload.signal);
+
+      if (!savedSignal || signalHashed !== savedSignal.hash) {
+        this.saveSignal(inputId, payload.signal);
+      }
+    }
+
+    if (payload.payload) {
+      this.insertDataFrame({
+        times: payload.payload.times,
+        series: {
+          [inputId]: payload.payload.values,
+        },
+      });
+    }
+
+    done();
+  };
+
+  ClarifyInsertNode.prototype.insertDataFrame = function (dataFrame) {
+    this.dataFrameBuffer.add(dataFrame);
+    this.reporter.setCount('insert', this.dataFrameBuffer.length);
+  };
+
+  ClarifyInsertNode.prototype.saveSignal = function (inputId, signal) {
+    this.saveSignalBuffer.add({inputId, signal});
+    this.reporter.setCount('signals', uniqueInputIds(this.saveSignalBuffer));
+  };
+
+  ClarifyInsertNode.prototype.flushDataFramesBuffer = async function (dataFrames) {
+    let data = structureData(dataFrames);
+    try {
+      let response = await this.api.insert({data});
+      this.send(response);
+      this.reporter.setError('insert', null);
+      this.reporter.setCount('insert', this.dataFrameBuffer.length);
+    } catch (error) {
+      let message = error instanceof Error ? error.message : 'Unknown error';
+      this.reporter.setError('insert', `Failed inserting data`);
+      this.error(message, {
+        payload: data,
+      });
+    }
+  };
+
+  ClarifyInsertNode.prototype.flushSaveSignalBuffer = async function (signals) {
+    let inputs = {};
+    for (let signal of signals) {
+      inputs[signal.inputId] = signal.signal;
+    }
+
+    try {
+      let response = await this.api.saveSignals({
+        createOnly: false,
+        inputs: inputs,
+      });
+      let integrationId = this.api.integrationId;
+      for (let inputId of Object.keys(response.signalsByInput)) {
+        let savedSignal = this.api.db.findSignal(integrationId, inputId);
+        let signal = inputs[inputId];
+        let signalHashed = hashSignal(signal);
+        if (savedSignal) {
+          this.api.db.patchSignal(integrationId, inputId, signalHashed);
+        } else {
+          this.api.db.createSignal(integrationId, inputId, signalHashed);
+        }
+      }
+      this.send(response);
+
+      this.reporter.setError('signals', null);
+      this.reporter.setCount('signals', uniqueInputIds(this.saveSignalBuffer));
+    } catch (error) {
+      let message = error instanceof Error ? error.message : 'Unknown error';
+      this.reporter.setError(
+        'signals',
+        `Failed saving ${signals.length} ${signals.length === 1 ? 'signal' : 'signals'}`,
+      );
+      this.error(message, {
+        payload: inputs,
+      });
+    }
+  };
   RED.nodes.registerType('clarify_insert', ClarifyInsertNode);
 };
-
-// bufferFlushDifference is the time in milliseconds between the ensure flush
-// operation and the data flush operation, added to the data flush operation to
-const bufferFlushDifference = 2000;
-
-// adjustDataBufferTime calculates a new data buffer time based on when the ensure flush operation is being executed.
-function adjustDataBufferTime(nextEnsureFlush, dataBufferTime) {
-  if (typeof nextEnsureFlush !== 'object') {
-    throw 'node.nextEnsureFlush is not an object';
-  }
-  if (!(nextEnsureFlush instanceof DateTime)) {
-    throw 'node.nextEnsureFlush is not an object';
-  }
-
-  let nextEnsureFlushInMs = nextEnsureFlush.diffNow().toObject().milliseconds;
-  if (nextEnsureFlushInMs < 0) {
-    throw 'node.nextEnsureFlush is not an object';
-  }
-
-  let adjustedDataBufferTime = bufferFlushDifference + Math.round(nextEnsureFlushInMs / 1000) * 1000;
-  if (adjustedDataBufferTime < dataBufferTime) {
-    return dataBufferTime;
-  }
-
-  return adjustedDataBufferTime;
-}

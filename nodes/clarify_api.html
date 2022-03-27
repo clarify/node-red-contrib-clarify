@@ -2,15 +2,8 @@
 <script type="text/javascript">
   RED.nodes.registerType('clarify_api', {
     category: 'config',
-
     credentials: {
       credentialsFile: {type: 'password'},
-      overrideApiUrl: {type: 'text'},
-      overrideTokenUrl: {type: 'text'},
-      overrideAudience: {type: 'text'},
-      overrideClientId: {type: 'text'},
-      overrideClientSecret: {type: 'password'},
-      overrideIntegrationId: {type: 'text'},
     },
     defaults: {
       name: {
@@ -21,8 +14,6 @@
       return this.name ? this.name : 'Client Credentials';
     },
     oneditprepare: function () {
-      var parent = this;
-
       $('#credentialsFileHidden').change(e => {
         const file = e.target.files[0];
         if (file === undefined) {
@@ -34,60 +25,36 @@
           return;
         }
 
-        if (file.size > 500) {
-          $('#credentialFileError').html('JSON file too large.');
-          return;
-        }
-
         let reader = new FileReader();
         reader.onerror = function (e) {
           console.error(e);
         };
         reader.onload = function (e) {
-          obj = JSON.parse(e.target.result);
-          if (obj.apiUrl === undefined || obj.apiUrl === '') {
-            $('#credentialFileError').html('Missing apiUrl');
-            return;
-          }
-          let url = new URL(obj.apiUrl);
-          let version = url.pathname.replace(/\//g, '');
-
-          switch (version) {
-            case 'v1':
-              // Supported version
-              break;
-            default:
-              $('#credentialFileError').html('Unsupported API version');
-              return;
-          }
-
-          if (obj.integration === undefined || obj.integration === '') {
-            $('#credentialFileError').html('Missing integration (id)');
-            return;
-          }
-          if (obj.credentials === undefined || typeof obj.credentials !== 'object') {
-            $('#credentialFileError').html('Missing credentials object');
-            return;
-          }
-          if (obj.credentials.type === undefined || typeof obj.credentials.type === '') {
-            $('#credentialFileError').html('Missing credentials.type');
-            return;
-          }
-          if (obj.credentials.type !== 'client-credentials') {
-            $('#credentialFileError').html('Unsupported credentials type credentials.type');
-            return;
-          }
-          if (obj.credentials.clientId === undefined || typeof obj.credentials.clientId === '') {
-            $('#credentialFileError').html('Missing credentials.clientId');
-            return;
-          }
-          if (obj.credentials.clientSecret === undefined || typeof obj.credentials.clientSecret === '') {
-            $('#credentialFileError').html('Missing credentials.clientSecret');
-            return;
-          }
-          $('#node-config-input-credentialsFile').val(e.target.result).change();
+          fetch('validateToken', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              credentials: e.target.result,
+            }),
+          })
+            .then(response => {
+              return response.json();
+            })
+            .then(data => {
+              if (data.isValid) {
+                $('#credentialFileError').html(``);
+                $('#node-config-input-credentialsFile').val(e.target.result).change();
+              } else {
+                $('#credentialFileError').html(`Validation failed: ${data.error}`);
+              }
+            })
+            .catch(error => {
+              $('#credentialFileError').html(`Exception: ${error}`);
+            });
         };
-        data = reader.readAsText(file);
+        reader.readAsText(file);
       });
 
       // chooseCredentialFileButton is a dummy button with correct styling that
@@ -99,9 +66,6 @@
       $('#clearCredentialsFile').click(() => {
         $('#credentialsFileHidden').val('');
         $('#node-config-input-credentialsFile').val('').change();
-        $.getJSON('clearCredentialsFile', {id: parent.id}).done(() => {
-          $('#tokenExpiration').change();
-        });
       });
 
       $('#node-config-input-credentialsFile').on('change', function (event) {
@@ -114,77 +78,20 @@
         }
       });
 
-      $('#tokenExpiration').on('change', function (event) {
-        $.getJSON('tokenValid', {id: parent.id})
-          .done(function (data) {
-            $('#tokenError').html('');
-            if (data.valid) {
-              $('#tokenControl').html('Clear');
-              $('#tokenExpiration').html('Expires ' + data.expiration + '.');
-              // Clear expiration message after 3 seconds
-              setTimeout(function () {
-                $('#tokenExpiration').html('');
-              }, 3000);
-            } else {
-              $('#tokenControl').html('Check credentials');
-              $('#tokenExpiration').html('');
-            }
-          })
-          .fail(function (jqxhr, textStatus, error) {
-            var err = textStatus + ', ' + error;
-            $('#tokenError').html(err);
-            console.error('Request Failed: ' + err);
-          });
-      });
-      $('#tokenExpiration').change();
-
-      $('#tokenControl').click(e => {
-        switch ($(e.target).text()) {
-          case 'Clear':
-            $.getJSON('clearToken', {id: parent.id})
-              .done(() => {
-                $('#tokenExpiration').change();
-              })
-              .fail(function (jqxhr, textStatus, error) {
-                var err = textStatus + ', ' + error;
-                console.error('Request Failed: ' + err);
-              });
-            break;
-          case 'Check credentials':
-            $.getJSON('getToken', {id: parent.id})
-              .done(data => {
-                if (!data.created) {
-                  if (data.msg) {
-                    RED.notify(RED._('notification.warning', {message: JSON.stringify(data.msg)}), 'warning');
-                  }
-                  $('#tokenError').html('Could not get token');
-                } else {
-                  $('#tokenExpiration').change();
-                }
-              })
-              .fail(function (jqxhr, textStatus, error) {
-                var err = textStatus + ', ' + error;
-                $('#tokenError').html(err);
-                console.error('Request Failed: ' + err);
-              });
-            break;
-        }
-      });
-
-      $('#advanced-settings').hide();
-      $('#advanced-settings-header').click(() => {
-        if ($('#advanced-settings').is(':visible')) {
-          $('#advanced-settings-caret').addClass('fa-caret-right').removeClass('fa-caret-down');
-          $('#advanced-settings').hide();
-        } else {
-          $('#advanced-settings-caret').addClass('fa-caret-down').removeClass('fa-caret-right');
-          $('#advanced-settings').show();
-        }
-      });
-
       $('#clearCache').click(e => {
-        $.getJSON('clearCache', {id: parent.id})
-          .done(function (data) {
+        fetch('clearCache', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nodeId: this.id,
+          }),
+        })
+          .then(response => {
+            return response.json();
+          })
+          .then(data => {
             if (data.cleared) {
               $('#clearCacheFeedback').html(data.msg);
               // Clear feedback message after 3 seconds
@@ -197,11 +104,9 @@
               $('#clearCacheError').html(data.msg);
             }
           })
-          .fail(function (jqxhr, textStatus, error) {
-            var err = textStatus + ', ' + error;
+          .catch(error => {
             $('#clearCacheFeedback').html('');
-            $('#clearCacheError').html(err);
-            console.error('Request Failed: ' + err);
+            $('#clearCacheError').html(`Unknown error happen: ${error.message}`);
           });
       });
     },
@@ -232,16 +137,6 @@
     </span>
   </div>
   <div class="form-row">
-    <label for="tokenControl">
-      <span data-i18n="clarify_api.label.accessToken">
-    </label>
-    <button type="button" id="tokenControl" class="red-ui-button">
-      <span data-i18n="clarify_api.label.clear">
-    </button>
-    <span id="tokenExpiration"></span>
-    <span id="tokenError" style="color: #AD1625;"></span>
-  </div>
-  <div class="form-row">
     <label for="clearCache">
       <span data-i18n="clarify_api.label.clearCache">
     </label>
@@ -251,49 +146,4 @@
     <span id="clearCacheFeedback"></span>
     <span id="clearCacheError" style="color: #AD1625;"></span>
   </div>
-  <hr align="middle" />
-  <div class="form-row">
-    <h4 style="cursor: pointer;" id="advanced-settings-header">
-      <i class="fa fa-caret-right" id="advanced-settings-caret"></i>
-      <span data-i18n="clarify_api.header.advancedSettings">
-    </h4>
-  </div>
-  <span id="advanced-settings">
-    <div class="form-row">
-      <label for="node-config-input-apiUrl">
-        <span data-i18n="clarify_api.label.apiUrl">
-      </label>
-      <input type="text" id="node-config-input-overrideApiUrl" data-i18n="[placeholder]clarify_api.label.apiUrl" />
-    </div>
-    <div class="form-row">
-      <label for="node-config-input-tokenUrl">
-        <span data-i18n="clarify_api.label.tokenUrl">
-      </label>
-      <input type="text" id="node-config-input-overrideTokenUrl" data-i18n="[placeholder]clarify_api.label.tokenUrl" />
-    </div>
-    <div class="form-row">
-      <label for="node-config-input-audience">
-        <span data-i18n="clarify_api.label.audience">
-      </label>
-      <input type="text" id="node-config-input-overrideAudience" data-i18n="[placeholder]clarify_api.label.audience" />
-    </div>
-    <div class="form-row">
-      <label for="node-config-input-clientId">
-        <span data-i18n="clarify_api.label.clientId">
-      </label>
-      <input type="text" id="node-config-input-overrideClientId" data-i18n="[placeholder]clarify_api.label.clientId" />
-    </div>
-    <div class="form-row">
-      <label for="node-config-input-clientSecret">
-        <span data-i18n="clarify_api.label.clientSecret">
-      </label>
-      <input type="password" id="node-config-input-overrideClientSecret" data-i18n="[placeholder]clarify_api.label.clientSecret" />
-    </div>
-    <div class="form-row">
-      <label for="node-config-input-integration-id">
-        <span data-i18n="clarify_api.label.integrationId">
-      </label>
-      <input type="text" id="node-config-input-overrideIntegrationId" data-i18n="[placeholder]clarify_api.label.integrationId" />
-    </div>
-  </span>
 </script>

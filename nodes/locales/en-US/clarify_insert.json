@@ -1,26 +1,10 @@
 {
   "clarify_insert": {
     "label": {
-      "annotations": "Annotations",
-      "bufferTime": "Buffer time",
-      "credentials": "Credentials",
-      "dataSeries": "Data series",
-      "dataTimes": "Data times",
-      "type": "Type",
-      "description": "Description",
-      "engUnit": "Eng. unit",
-      "enumValues": "Enum values",
-      "gapDetection": "Gap detection",
-      "id": "ID",
-      "labels": "Labels",
       "name": "Name",
-      "sampleInterval": "Sample interval",
-      "secs": "seconds",
-      "sourceType": "Source type"
-    },
-    "header": {
-      "advancedSettings": "Advanced settings",
-      "signalInfo": "Signal info"
+      "credentials": "Credentials",
+      "bufferTime": "Buffer time",
+      "secs": "seconds"
     }
   }
 }
