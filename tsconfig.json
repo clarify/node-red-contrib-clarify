@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": false,
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "importHelpers": true,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "baseUrl": "."
+  },
+  "include": ["tests/**/*", "types/**/*"]
+}
