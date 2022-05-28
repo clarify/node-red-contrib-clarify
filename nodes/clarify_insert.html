@@ -2,7 +2,8 @@
   (function () {
     RED.nodes.registerType('clarify_insert', {
       category: 'Clarify',
-      color: '#00FF75',
+      color: '#b3ffd6',
+
       defaults: {
         name: {value: ''},
         apiRef: {value: null, type: 'clarify_api'},
@@ -16,7 +17,7 @@
       },
       inputs: 1,
       outputs: 1,
-      icon: 'clarify.png',
+      icon: 'clarify.svg',
       label: function () {
         let name = this.name || 'insert';
         return `${name} (${this.bufferTime}s)`;
