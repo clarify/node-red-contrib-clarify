@@ -34,6 +34,7 @@
     "npm": "8.11.0"
   },
   "node-red": {
+    "version": ">=2.0.0",
     "nodes": {
       "clarify_api": "nodes/clarify_api.js",
       "clarify_insert": "nodes/clarify_insert.js"
