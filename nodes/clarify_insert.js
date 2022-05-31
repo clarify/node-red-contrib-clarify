@@ -2,7 +2,7 @@ var _ = require('lodash');
 var Mutex = require('async-mutex').Mutex;
 const {DateTime} = require('luxon');
 
-const clarifyInputIdRegEx = /^[a-z0-9_-]{1,40}$/;
+const clarifyInputIdRegEx = /^[a-zA-Z0-9-_:.#+/]{1,128}$/;
 
 module.exports = function (RED) {
   var util = require('./clarify_util');
