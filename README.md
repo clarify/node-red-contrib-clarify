@@ -35,8 +35,14 @@ As for the insert node _output_ message format, development is still ongoing, an
 
 The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from `v.1.0.0-beta.3`.
 
+### 1.0.2
+
+- Use less strict input id (topic) requirements
+
 ### 1.0.1
+
 - Changed default branch name from `master` to `main`.
+
 ### 1.0.0
 
 - Change outputs to only output data from Clarify servers.
