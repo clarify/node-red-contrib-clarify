@@ -9,6 +9,7 @@
   },
   "scripts": {
     "test": "vitest",
+    "ci:test": "vitest --run",
     "coverage": "vitest run --coverage"
   },
   "author": {
