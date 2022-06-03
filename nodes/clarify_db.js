@@ -3,19 +3,42 @@
 // FIXME: This code is applicable for 1.0.0, but v2 is different
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
-
 const fs = require('fs');
 
-module.exports = class ClarifyDb {
-  dbs = {};
+/**
+ * @class ClarifyDatabase
+ */
+class ClarifyDatabase {
+  /** @type {string} */
+  nodeId;
 
-  folderName = '';
+  /** @type {string} */
+  folderName;
 
-  constructor(userDir) {
-    this.folderName = userDir + '/clarify-db';
+  /** @type {string} */
+  integration;
+
+  /** @type {low.LowdbSync<{signals: {[key: string]: string}}>} */
+  database;
+
+  constructor(userDir, nodeId, integration) {
+    this.integration = integration;
+    this.nodeId = nodeId;
+    this.folderName = `${userDir}/clarify-db`;
     this.createDbFolder(this.folderName);
-
     this.deletePreviousVersions(userDir);
+    this.database = this.createDatabase();
+  }
+
+  createDatabase() {
+    const adapter = new FileSync(`${this.folderName}/signals-v2-${this.nodeId}-${this.integration}.json`);
+
+    let db = low(adapter);
+    db.defaults({
+      signals: {},
+    }).write();
+
+    return db;
   }
 
   createDbFolder(folderName) {
@@ -30,15 +53,11 @@ module.exports = class ClarifyDb {
 
   deletePreviousVersions(userDir) {
     // previousVersions contains a list of all previous known versions of this database.
-    let previousVersions = [userDir + '/clarify_db.json'];
+    let previousVersions = [`${userDir}/clarify_db.json`, `${this.folderName}/signals-v1-${this.integration}.json`];
     previousVersions.forEach(path => {
       try {
         if (fs.existsSync(path)) {
-          try {
-            fs.unlinkSync(path);
-          } catch (err) {
-            console.error(err);
-          }
+          fs.unlinkSync(path);
         }
       } catch (err) {
         console.log(err);
@@ -46,39 +65,17 @@ module.exports = class ClarifyDb {
     });
   }
 
-  getDb(integrationId) {
-    if (!(integrationId in this.dbs)) {
-      const adapter = new FileSync(this.folderName + `/signals-v1-${integrationId}.json`);
-
-      let db = low(adapter);
-      db.defaults({
-        signals: [],
-      }).write();
-
-      this.dbs[integrationId] = db;
-    }
-    return this.dbs[integrationId];
+  removeAll() {
+    return this.database.set('signals', {}).write();
   }
 
-  removeAllByIntegrationId(integrationId) {
-    return this.getDb(integrationId).get('signals').remove().write();
+  findSignal(inputId) {
+    return this.database.get('signals').get(inputId).value();
   }
 
-  findSignal(integrationId, inputId) {
-    return this.getDb(integrationId).get('signals').find({inputId: inputId}).value();
+  saveSignal(inputId, hash) {
+    return this.database.get('signals').set(inputId, hash).write();
   }
+}
 
-  patchSignal(integrationId, inputId, hash) {
-    return this.getDb(integrationId).get('signals').find({inputId: inputId}).assign({hash: hash}).write();
-  }
-
-  createSignal(integrationId, inputId, hash) {
-    this.getDb(integrationId)
-      .get('signals')
-      .push({
-        inputId: inputId,
-        hash: hash,
-      })
-      .write();
-  }
-};
+module.exports = ClarifyDatabase;

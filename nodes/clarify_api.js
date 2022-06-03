@@ -1,4 +1,4 @@
-const ClarifyDb = require('./clarify_db.js');
+const ClarifyDatabase = require('./clarify_db.js');
 const {Client} = require('@clarify/api');
 const Joi = require('joi');
 
@@ -15,7 +15,6 @@ const CredentialSchema = Joi.object({
 module.exports = function (RED) {
   function ClarifyApiNode(config) {
     RED.nodes.createNode(this, config);
-    this.db = new ClarifyDb(RED.settings.userDir);
     if (this.credentials && this.credentials.credentialsFile) {
       try {
         let file = JSON.parse(this.credentials.credentialsFile);
@@ -23,9 +22,10 @@ module.exports = function (RED) {
         if (!error) {
           this.client = new Client(file);
           this.integrationId = file.integration;
+          this.database = new ClarifyDatabase(RED.settings.userDir, this.id, file.integration);
         }
       } catch (error) {
-        console.error('Failed creating client');
+        console.error('Failed creating client: ', error);
       }
     }
   }
@@ -60,9 +60,10 @@ module.exports = function (RED) {
       msg: undefined,
     };
 
+    /** @type {ClarifyApiNode} */
     let node = RED.nodes.getNode(req.body.nodeId);
-    if (node) {
-      let signalsRemoved = node.db.removeAllByIntegrationId(node.integrationId);
+    if (node && node.database) {
+      let signalsRemoved = node.database.removeAll();
       out.msg = `Removed ${signalsRemoved.length} signals`;
       out.cleared = true;
     } else {
