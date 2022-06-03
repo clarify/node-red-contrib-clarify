@@ -160,7 +160,7 @@ module.exports = function (RED) {
   }
 
   ClarifyInsertNode.prototype.handleInput = async function (msg, send, done) {
-    if (this.api === null || !this.api.client) {
+    if (this.api === null || !this.api.client || !this.api.database) {
       let errorMessage = 'Missing API configuration';
       this.status({fill: 'red', shape: 'ring', text: errorMessage});
       done(errorMessage);
@@ -180,11 +180,10 @@ module.exports = function (RED) {
       return;
     }
 
-    let integrationId = this.api.integrationId;
     let inputId = payload.topic;
 
     if (payload.signal) {
-      let savedSignal = this.api.db.findSignal(integrationId, payload.topic);
+      let savedSignal = this.api.database.findSignal(payload.topic);
       let signalHashed = hashSignal(payload.signal);
 
       if (!savedSignal || signalHashed !== savedSignal.hash) {
@@ -241,17 +240,12 @@ module.exports = function (RED) {
         createOnly: false,
         inputs: inputs,
       });
-      let integrationId = this.api.integrationId;
+
       for (let inputId of Object.keys(response.signalsByInput)) {
-        let savedSignal = this.api.db.findSignal(integrationId, inputId);
         let signal = inputs[inputId];
-        let signalHashed = hashSignal(signal);
-        if (savedSignal) {
-          this.api.db.patchSignal(integrationId, inputId, signalHashed);
-        } else {
-          this.api.db.createSignal(integrationId, inputId, signalHashed);
-        }
+        this.api.database.saveSignal(inputId, hashSignal(signal));
       }
+
       this.send(response);
 
       this.reporter.setError('signals', null);

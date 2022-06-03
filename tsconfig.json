@@ -20,5 +20,5 @@
     "noUnusedParameters": true,
     "baseUrl": "."
   },
-  "include": ["tests/**/*", "types/**/*"]
+  "include": ["nodes/**/*", "tests/**/*", "types/**/*"]
 }
