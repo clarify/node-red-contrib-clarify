@@ -1,35 +1,5 @@
-const Joi = require('joi');
 const {structureData, hashSignal} = require('./clarify_util');
-
-const clarifyInputIdRegEx = /^[a-zA-Z0-9-_:.#+/]{1,128}$/;
-const numbers = '\\d+(?:[\\.,]\\d+)?';
-const datePattern = `(${numbers}D)?`;
-const timePattern = `T(${numbers}H)?(${numbers}M)?(${numbers}S)?`;
-const duration = new RegExp(`^P(?:${datePattern}(?:${timePattern})?)$`);
-const keyPattern = /^[a-zA-Z0-9_/-]{1,40}$/;
-
-const SignalSchema = Joi.object({
-  name: Joi.string().max(100).required(),
-  type: Joi.string().valid('enum', 'numeric'),
-  description: Joi.string().max(1000),
-  engUnit: Joi.string().max(255),
-  sourceType: Joi.string().valid('aggregation', 'measurement', 'prediction'),
-  sampleInterval: Joi.string().regex(duration),
-  gapDetection: Joi.string().regex(duration),
-  labels: Joi.object().pattern(keyPattern, Joi.array().items(Joi.string())),
-  annotations: Joi.object().pattern(keyPattern, Joi.string()),
-});
-
-const PayloadSchema = Joi.object({
-  times: Joi.array().items(Joi.date().iso().cast('string'), Joi.date().timestamp().cast('string')),
-  values: Joi.array().items(Joi.number(), Joi.equal(null)),
-}).assert('times.length', Joi.ref('values.length'));
-
-const MessageSchema = Joi.object({
-  topic: Joi.string().regex(clarifyInputIdRegEx).required(),
-  signal: SignalSchema,
-  payload: PayloadSchema,
-});
+const {validateMessage} = require('./utilities/validate-input');
 
 class DataBuffer {
   constructor(timeout, flush) {
@@ -169,11 +139,7 @@ module.exports = function (RED) {
 
     let payload;
     try {
-      payload = await MessageSchema.validateAsync({
-        topic: msg.topic,
-        signal: msg.signal,
-        payload: msg.payload,
-      });
+      payload = await validateMessage(msg);
     } catch (error) {
       this.status({fill: 'red', shape: 'ring', text: `${error}`});
       done(`${error}`);

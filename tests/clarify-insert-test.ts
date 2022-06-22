@@ -66,10 +66,10 @@ describe('clarify-insert', () => {
           },
         });
 
-        await Promise.resolve();
-
+        await waitUntil(() => insertNode.status.calledOnce);
         assert.notOk(insertRequest.calledOnce);
         assert.ok(insertNode.status.calledOnce);
+
         await clock.runAllAsync();
 
         await waitUntil(() => insertRequest.calledOnce && insertNode.status.calledThrice);
@@ -309,10 +309,10 @@ describe('clarify-insert', () => {
           },
         });
 
-        await Promise.resolve();
-
+        await waitUntil(() => insertNode.status.calledOnce);
         assert.notOk(insertRequest.calledOnce);
         assert.ok(insertNode.status.calledOnce);
+
         await clock.runAllAsync();
 
         await waitUntil(() => insertNode.error.calledOnce);
@@ -338,10 +338,10 @@ describe('clarify-insert', () => {
           },
         });
 
-        await Promise.resolve();
-
+        await waitUntil(() => insertNode.status.calledOnce);
         assert.notOk(saveRequest.calledOnce);
         assert.ok(insertNode.status.calledOnce);
+
         await clock.runAllAsync();
 
         await waitUntil(() => insertNode.error.calledOnce);
