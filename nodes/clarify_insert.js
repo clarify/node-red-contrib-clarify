@@ -185,8 +185,7 @@ module.exports = function (RED) {
     if (payload.signal) {
       let savedSignal = this.api.database.findSignal(payload.topic);
       let signalHashed = hashSignal(payload.signal);
-
-      if (!savedSignal || signalHashed !== savedSignal.hash) {
+      if (signalHashed !== savedSignal) {
         this.saveSignal(inputId, payload.signal);
       }
     }

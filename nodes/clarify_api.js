@@ -64,7 +64,7 @@ module.exports = function (RED) {
     let node = RED.nodes.getNode(req.body.nodeId);
     if (node && node.database) {
       let signalsRemoved = node.database.removeAll();
-      out.msg = `Removed ${signalsRemoved.length} signals`;
+      out.msg = `Removed ${Object.keys(signalsRemoved).length} signals`;
       out.cleared = true;
     } else {
       out.msg = 'Node not deployed';
