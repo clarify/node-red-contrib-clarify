@@ -18,14 +18,6 @@ import {setupFakeTimers} from './utilities/setup-fake-timers';
 import {loadFlow, loadFlowWithoutAPI, loadFlowWithoutCredentials} from './utilities/load-flow';
 import sinon from 'sinon';
 
-let assertCalledWithoutMessageId = (expected: unknown) => {
-  return match(payload => {
-    let data = {...payload};
-    delete data['_msgid'];
-    assert.deepEqual(data, expected);
-  });
-};
-
 let assertMatches = (expected: unknown) => {
   return match(payload => {
     try {
@@ -80,23 +72,10 @@ describe('clarify-insert', () => {
         assert.ok(insertNode.status.calledOnce);
         await clock.runAllAsync();
 
-        await waitUntil(() => insertRequest.calledOnce);
-        await waitUntil(() => insertNode.send.calledOnce);
+        await waitUntil(() => insertRequest.calledOnce && insertNode.status.calledThrice);
 
         assert.ok(insertNode.status.calledThrice);
         assert.equal(insertNode.error.callCount, 0);
-        assert.ok(insertNode.send.calledOnce);
-
-        insertNode.send.calledWithMatch(
-          assertCalledWithoutMessageId({
-            signalsByInput: {
-              'clarify-input-id': {
-                id: 'clarify-input-id',
-                created: false,
-              },
-            },
-          }),
-        );
       });
 
       test('concatinates multiple topics', async () => {
@@ -123,7 +102,7 @@ describe('clarify-insert', () => {
         assert.notOk(insertRequest.calledOnce);
 
         await clock.runAllAsync();
-        await waitUntil(() => insertRequest.calledOnce && insertNode.send.calledOnce);
+        await waitUntil(() => insertRequest.calledOnce);
 
         assert.ok(
           insertRequest.calledWithExactly({
@@ -174,7 +153,7 @@ describe('clarify-insert', () => {
         assert.notOk(insertRequest.calledOnce);
 
         await clock.runAllAsync();
-        await waitUntil(() => insertRequest.calledOnce && insertNode.send.calledOnce);
+        await waitUntil(() => insertRequest.calledOnce);
 
         assert.ok(
           insertRequest.calledWithExactly({
@@ -207,7 +186,7 @@ describe('clarify-insert', () => {
         assert.notOk(saveRequest.calledOnce);
 
         await clock.runAllAsync();
-        await waitUntil(() => saveRequest.calledOnce && insertNode.send.calledOnce);
+        await waitUntil(() => saveRequest.calledOnce);
 
         assert.ok(
           saveRequest.calledWithExactly({
@@ -237,7 +216,7 @@ describe('clarify-insert', () => {
         assert.notOk(saveRequest.calledOnce);
 
         await clock.runAllAsync();
-        await waitUntil(() => saveRequest.calledOnce && insertNode.send.calledOnce);
+        await waitUntil(() => saveRequest.calledOnce);
 
         insertNode.receive({
           topic: 'clarify-input-id-04',
@@ -247,7 +226,7 @@ describe('clarify-insert', () => {
         });
 
         await clock.runAllAsync();
-        await waitUntil(() => saveRequest.calledTwice && insertNode.send.calledTwice);
+        await waitUntil(() => saveRequest.calledTwice);
       });
     });
   });
@@ -301,7 +280,6 @@ describe('clarify-insert', () => {
 
       await clock.runAllAsync();
       await waitUntil(() => insertNode.error.calledOnce);
-      assert.notOk(insertNode.send.called, 'Refrains from calling send');
       assert.ok(insertNode.status.called, 'Invokes error callback');
     });
   });
@@ -349,8 +327,6 @@ describe('clarify-insert', () => {
             },
           }),
         );
-
-        assert.notOk(insertNode.send.called, 'Send is never invoked');
       });
 
       test('clarify-insert node sends saving signals', async () => {
@@ -381,8 +357,6 @@ describe('clarify-insert', () => {
             },
           }),
         );
-
-        assert.notOk(insertNode.send.called, 'Send is never invoked');
       });
     });
 
@@ -402,7 +376,6 @@ describe('clarify-insert', () => {
         });
         await clock.runAllAsync();
         await waitUntil(() => insertNode.status.calledOnce);
-        assert.notOk(insertNode.send.called, 'Refrains from calling send');
         assert.ok(insertNode.error.called, 'Invokes error callback');
       });
     });
@@ -424,7 +397,6 @@ describe('clarify-insert', () => {
         });
         await clock.runAllAsync();
         await waitUntil(() => insertNode.status.calledTwice);
-        assert.notOk(insertNode.send.called, 'Refrains from calling send');
         assert.ok(insertNode.error.called, 'Invokes error callback');
       });
     });
