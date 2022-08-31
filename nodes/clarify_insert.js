@@ -216,8 +216,7 @@ module.exports = function (RED) {
   ClarifyInsertNode.prototype.flushDataFramesBuffer = async function (dataFrames) {
     let data = structureData(dataFrames);
     try {
-      let response = await this.api.insert({data});
-      this.send(response);
+      await this.api.insert({data});
       this.reporter.setError('insert', null);
       this.reporter.setCount('insert', this.dataFrameBuffer.length);
     } catch (error) {
@@ -245,8 +244,6 @@ module.exports = function (RED) {
         let signal = inputs[inputId];
         this.api.database.saveSignal(inputId, hashSignal(signal));
       }
-
-      this.send(response);
 
       this.reporter.setError('signals', null);
       this.reporter.setCount('signals', uniqueInputIds(this.saveSignalBuffer));
