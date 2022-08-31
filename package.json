@@ -55,7 +55,7 @@
     "@types/supertest": "^2.0.12",
     "c8": "^7.11.3",
     "msw": "^0.41.0",
-    "node-red": "^2",
+    "node-red": "^3",
     "node-red-node-test-helper": "^0.2.7",
     "sinon": "^14.0.0",
     "vitest": "^0.12.9"
