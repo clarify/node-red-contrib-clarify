@@ -7,14 +7,14 @@
 
   <h3>General Properties</h3>
   <dl class="message-properties">
-    <dt>API <span class="property-type">config</span></dt>
-    <dd>API Configuration</dd>
+    <dt>Credentials <span class="property-type">clarify_api</span></dt>
+    <dd>Clarify API configuration</dd>
   </dl>
 
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>topic <span class="property-type">string</span></dt>
-    <dd>A unique id per signal that has to match the regex for the Clarify Input ID, <code>/^[a-z0-9_-]{1,40}$/</code>. If the id is changed will a new signal be created.</dd>
+    <dd>A unique id per signal that has to match the regex for the Clarify Input ID, <code> /^[a-zA-Z0-9-_:.#+/]{1,128}$/</code>. If the id is changed will a new signal be created.</dd>
 
     <dt class="optional">payload <span class="property-type">object || undefined</span></dt>
     <dd>
@@ -31,27 +31,9 @@
     </dd>
   </dl>
 
-  <h3>Outputs</h3>
-  <dl class="message-properties">
-    <dt>method <span class="property-type">string</span></dt>
-    <dd>Describe which RPC method is called.</dd>
-
-    <dt>statusCode <span class="property-type">number</span></dt>
-    <dd>The status code of the response, or the error code if the request could not be completed.</dd>
-
-    <dt>payload <span class="property-type">object</span></dt>
-    <dd>The body of the response.</dd>
-
-    <dt>headers <span class="property-type">string</span></dt>
-    <dd>An object containing the response headers.</dd>
-
-    <dt>errorType <span class="property-type">string</span></dt>
-    <dd>Type of error. Three possible error types exists; HTTP, Input, Request, and RPC.</dd>
-  </dl>
-
   <h3>References</h3>
   <p>
-      <a href="https://docs.clarify.io">Clarify Documentation</a>
+    <a href="https://docs.clarify.io">Clarify Documentation</a>
   </p>
 
   <h3>Example message</h3>

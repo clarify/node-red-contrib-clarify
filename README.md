@@ -8,7 +8,9 @@ Available nodes are:
 - clarify_insert: A node to create signals, update meta-data and insert data into Clarify.
 - clarify_api: A `configuration node` to establish connection to Clarify.
 
-![Clarify Insert Node](https://github.com/clarify/node-red-contrib-clarify/blob/main/examples/clarify-insert-node.png?raw=true)
+<p align="center">
+<img alt="Clarify insert node in node-red’s sidebar" src="./examples/clarify-insert-node@2x.png" width="178" height="104" />
+</p>
 
 This node will create a json-database to keep track of the signals and meta data written to Clarify.
 
@@ -19,65 +21,8 @@ If you are moving your node-red instance or creating backups, be sure to include
 
 ## Examples
 
-You can find an example flow that shows how to use the insert node in `examples/random-data-example.json`. Please review the `Generate Data` function. Also remember to update the `clarify_api` configuration node with credentials downloaded from your integration in the Clarify Admin Panel.
+You can find an example flow that shows how to use the insert node in `examples/random-data-example.json`. Please review the `Generate Data` function. Remember to update the `clarify_api` configuration node with credentials downloaded from your integration in the Clarify Admin Panel.
 
-![Clarify Insert Node](https://github.com/clarify/node-red-contrib-clarify/blob/main/examples/random-data-example.png?raw=true)
+<img alt="Example flow showing clarify insert node in use" src="./examples/random-data-example@2x.png" width="618" height="118" />
 
 Any questions? Send us an email on support@clarify.io
-
-## Backwards compatibility
-
-From v1.0.0-beta.4 we do not expect to do any breaking changes to the insert node input message format. However we might add new optional fields.
-
-As for the insert node _output_ message format, development is still ongoing, and breaking changes must be expected before the final v1.0.0 release. The number of outputs may also change.
-
-## Changelog
-
-The changelog is introduced from `v.1.0.0-beta.4`, and describe changes from `v.1.0.0-beta.3`.
-
-### 1.0.2
-
-- Use less strict input id (topic) requirements
-
-### 1.0.1
-
-- Changed default branch name from `master` to `main`.
-
-### 1.0.0
-
-- Change outputs to only output data from Clarify servers.
-- Merged the two outputs from the insert block into one output. See node documentation for more information.
-- Change Clarify URLs from clarify.us to clarify.io.
-
-### 1.0.0-beta.9
-
-- Moved code from repo github.com/searis to github.com/clarify.
-
-### 1.0.0-beta.8
-
-- Bugfix: reset mutex on http error in fetchToken
-
-### 1.0.0-beta.7
-
-- Minimum buffertime is 5 seconds
-- Use new endpoint for access tokens
-
-### 1.0.0-beta.4 - Breaking changes from -beta.3
-
-Updated the format of the messages according to this proposal: https://github.com/clarify/node-red-contrib-clarify/issues/28
-
-- The Input ID is put in `msg.topic`
-- The signal meta data is moved out of the payload to `msg.signal`
-- `msg.payload.data.times` is renamed/moved to `msg.payload.times`
-- `msg.payload.data.series` is renamed/moved to `msg.payload.values`
-
-New message format:
-
-```js
-msg:
-  topic: "<Input ID>"
-  payload:
-    times: ["<timestamp>", ...]
-    values: [(<number>||null), ...]
-  signal: <Signal> // Match https://docs.clarify.io/reference#signal
-```
