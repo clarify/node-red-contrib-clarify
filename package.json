@@ -53,12 +53,13 @@
     "@types/node-fetch": "^2.6.1",
     "@types/sinon": "^10.0.11",
     "@types/supertest": "^2.0.12",
+    "@vitest/coverage-c8": "^0.23.1",
     "c8": "^7.11.3",
     "msw": "^0.41.0",
     "node-red": "^3",
-    "node-red-node-test-helper": "^0.2.7",
+    "node-red-node-test-helper": "^0.3.0",
     "sinon": "^14.0.0",
-    "vitest": "^0.12.9"
+    "vitest": "^0.23.1"
   },
   "engines": {
     "node": ">=14.0.0"
