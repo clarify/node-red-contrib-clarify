@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0
+
+### New features
+
+- Support for including `enumValues` is restored.
+- Added new payload formats: You're now allowed to send in just a number as the payload, an object containing a time and a value, or the existing format, an object with two arrays with `times` and `values`.
+- Allow setting `valueType` on the signal. `type` is being renamed to `valueType` on the API. We will be trating `type` as an alias for `valueType`.
+
 ## 2.0.0
 
 ### Breaking changes
