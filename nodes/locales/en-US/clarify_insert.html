@@ -16,19 +16,35 @@
     <dt>topic <span class="property-type">string</span></dt>
     <dd>A unique id per signal that has to match the regex for the Clarify Input ID, <code> /^[a-zA-Z0-9-_:.#+/]{1,128}$/</code>. If the id is changed will a new signal be created.</dd>
 
-    <dt class="optional">payload <span class="property-type">object || undefined</span></dt>
+    <dt class="optional">payload <span class="property-type">object</span></dt>
     <dd>
-      Object containing two elements; times and values.
+      Send multiple values:
       <code>times: ["&lt;timestamp&gt;", ...]</code>
       <code>values: [(&lt;number&gt; || null), ...]</code>
-      If omitted, no data will be sent to Clarify.
     </dd>
 
+    <dt class="optional">payload <span class="property-type">object</span></dt>
+    <dd>
+      Send single value with time:
+      <code>time: &lt;timestamp&gt;</code>
+      <code>value: &lt;number&gt;</code>
+    </dd>
+
+    <dt class="optional">payload <span class="property-type">number</span></dt>
+    <dd>
+      Sends a single value using the current time as the timestamp.
+    </dd>
     <dt class="optional">signal <span class="property-type">object&lt;Signal&gt; || undefined</span></dt>
     <dd>
       Metadata for the signal. Content must match the <a href="https://docs.clarify.io/reference#signal">Signal object</a> in the Clarify documentation.
       If omitted, no meta data will be changed in Clarify.
     </dd>
+  </dl>
+
+  <h3>Types</h3>
+  <dl class="message-properties">
+    <dt>Timestamp</dt>
+    <dd>Timestamps can either be an ISO8601 formatted string, a JavaScript Date object, or the number of ms from 1970</dd>
   </dl>
 
   <h3>References</h3>
@@ -42,7 +58,7 @@
     "topic": "id100",
     "signal": {
       "name": "Ice Cream Temperature",
-      "type": "numeric",
+      "valueType": "numeric",
       "description": "Temperature measurement of the ice cream",
       "labels": {
         "flavours": ["sweet", "sour"],
