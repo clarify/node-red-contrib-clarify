@@ -18,6 +18,9 @@ class DataBuffer {
       clearTimeout(this.flushTimer);
       this.flushTimer = null;
     }
+    let buffer = [...this.buffer];
+    this.buffer = [];
+    return buffer;
   }
 
   add(data) {
@@ -123,9 +126,23 @@ module.exports = function (RED) {
       this.handleInput(msg, send, done);
     });
 
-    this.on('close', () => {
-      this.dataFrameBuffer.cancel();
-      this.saveSignalBuffer.cancel();
+    this.on('close', done => {
+      let promises = [];
+      let dataFrames = this.dataFrameBuffer.cancel();
+      let signals = this.saveSignalBuffer.cancel();
+      if (dataFrames.length) {
+        let promise = this.flushDataFramesBuffer(dataFrames);
+        promises.push(promise);
+      }
+
+      if (signals.length) {
+        let promise = this.flushSaveSignalBuffer(data);
+        promises.push(promise);
+      }
+
+      Promise.allSettled(promises).finally(() => {
+        done();
+      });
     });
   }
 
