@@ -49,7 +49,7 @@ module.exports = function (RED) {
     } catch (error) {
       response.json({
         isValid: false,
-        error: error.message ?? error,
+        error: error.message || error,
       });
     }
   });
