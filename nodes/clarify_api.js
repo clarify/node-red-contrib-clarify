@@ -15,6 +15,8 @@ const CredentialSchema = Joi.object({
 module.exports = function (RED) {
   function ClarifyApiNode(config) {
     RED.nodes.createNode(this, config);
+    this.requests = new Set();
+
     if (this.credentials && this.credentials.credentialsFile) {
       try {
         let file = JSON.parse(this.credentials.credentialsFile);
@@ -28,14 +30,34 @@ module.exports = function (RED) {
         console.error('Failed creating client: ', error);
       }
     }
+
+    this.on('close', done => {
+      let requests = Array.from(this.requests);
+      Promise.allSettled(requests).finally(() => {
+        done();
+      });
+    });
   }
 
-  ClarifyApiNode.prototype.saveSignals = function (payload) {
-    return this.client.saveSignals(payload);
+  ClarifyApiNode.prototype.handleRequest = async function (request) {
+    this.requests.add(request);
+    try {
+      return await request;
+    } catch (error) {
+      return Promise.reject(error);
+    } finally {
+      this.requests.delete(request);
+    }
   };
 
-  ClarifyApiNode.prototype.insert = function (data) {
-    return this.client.insert(data);
+  ClarifyApiNode.prototype.saveSignals = async function (payload) {
+    let request = this.client.saveSignals(payload);
+    return await this.handleRequest(request);
+  };
+
+  ClarifyApiNode.prototype.insert = async function (data) {
+    let request = this.client.insert(data);
+    return await this.handleRequest(request);
   };
 
   RED.httpAdmin.post('/validateToken', async function (request, response) {
