@@ -38,7 +38,8 @@
     "version": ">=2.0.0",
     "nodes": {
       "clarify_api": "nodes/clarify_api.js",
-      "clarify_insert": "nodes/clarify_insert.js"
+      "clarify_insert": "nodes/clarify_insert.js",
+      "clarify_data_frame": "nodes/clarify_data_frame.js"
     }
   },
   "dependencies": {

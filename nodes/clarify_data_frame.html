@@ -1,0 +1,37 @@
+<script type="text/javascript">
+  (function () {
+    RED.nodes.registerType('clarify_data_frame', {
+      name: 'Clarify data frame',
+      category: 'Clarify',
+      color: '#b3ffd6',
+      defaults: {
+        name: {value: ''},
+        apiRef: {value: null, type: 'clarify_api'},
+      },
+      inputs: 1,
+      outputs: 1,
+      icon: 'clarify.svg',
+      label: function () {
+        let name = this.name || 'data frame';
+        return name;
+      },
+      oneditprepare: function () {
+        $('.msg-field').typedInput({
+          default: 'msg',
+          types: ['msg'],
+        });
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="clarify_data_frame">
+  <div class="form-row">
+    <label for="node-input-name"><span data-i18n="clarify_insert.label.name"></label>
+    <input type="text" id="node-input-name" data-i18n="[placeholder]clarify_insert.label.name" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-apiRef"><span data-i18n="clarify_insert.label.credentials"></label>
+    <input type="text" id="node-input-apiRef" data-i18n="[placeholder]clarify_insert.label.credentials" />
+  </div>
+</script>
