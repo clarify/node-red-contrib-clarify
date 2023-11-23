@@ -46,6 +46,15 @@ module.exports = function (RED) {
     };
   };
 
+  ClarifyApiNode.prototype.evaluate = async function (data) {
+    let payload = await this.client.evaluate(data);
+    return {
+      included: payload.included ?? [],
+      data: new DataFrameResponse(payload.data),
+      meta: payload.meta,
+    };
+  };
+
   RED.httpAdmin.post('/validateToken', async function (request, response) {
     try {
       let credentials = request.body.credentials;

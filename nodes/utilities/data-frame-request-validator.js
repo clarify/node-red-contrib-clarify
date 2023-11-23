@@ -46,4 +46,53 @@ const DataFrameRequestValidator = Joi.object({
   groupIncludedByType: Joi.boolean(),
 });
 
-module.exports = {DataFrameRequestValidator};
+const EvaluateValidator = Joi.object({
+  items: Joi.array().items(
+    Joi.object({
+      id: Joi.string().required(),
+      alias: Joi.string().required(),
+      aggregation: Joi.string()
+        .valid(
+          'min',
+          'max',
+          'avg',
+          'count',
+          'sum',
+          'state-histogram-rate',
+          'state-histogram-seconds',
+          'state-histogram-percent',
+        )
+        .required(),
+      state: Joi.number(),
+      lag: Joi.number(),
+      lead: Joi.number(),
+    }),
+  ),
+  calculations: Joi.array().items(
+    Joi.object({
+      formula: Joi.string().required(),
+      alias: Joi.string().required(),
+    }),
+  ),
+  data: Joi.object({
+    filter: Joi.object({
+      times: Joi.object({
+        $gte: Joi.alternatives().try(Joi.date().iso().cast('string'), Joi.date().timestamp().cast('string')),
+        $lt: Joi.alternatives().try(Joi.date().iso().cast('string'), Joi.date().timestamp().cast('string')),
+      }).required(),
+      series: Joi.object({
+        $in: Joi.array().items(Joi.string()).required(),
+      }).required(),
+    }).required(),
+    timeZone: Joi.string(),
+    firstDayOfWeek: Joi.number(),
+    outsidePoints: Joi.boolean(),
+    rollup: Joi.string().regex(duration),
+    origin: Joi.alternatives().try(Joi.date().iso().cast('string'), Joi.date().timestamp().cast('string')),
+    last: Joi.number(),
+  }).required(),
+  include: Joi.array().items('item'),
+  groupIncludedByType: Joi.boolean(),
+});
+
+module.exports = {DataFrameRequestValidator, EvaluateValidator};
