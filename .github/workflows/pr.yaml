@@ -8,17 +8,19 @@ jobs:
     strategy:
       matrix:
         node:
+          - '18'
           - '16'
-          - '14'
         node-red:
           - '^3'
+          - '~3.1'
+          - '~3.0'
           - '^2'
           - '~2.1'
           - '~2.0'
     name: Tests (Node ${{ matrix.node }} - node-red ${{ matrix.node-red }})
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies

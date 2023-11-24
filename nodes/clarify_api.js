@@ -1,5 +1,5 @@
 const ClarifyDatabase = require('./clarify_db.js');
-const {Client} = require('@clarify/api');
+const {Client, DataFrameResponse} = require('@clarify/api');
 const Joi = require('joi');
 
 const CredentialSchema = Joi.object({
@@ -36,6 +36,23 @@ module.exports = function (RED) {
 
   ClarifyApiNode.prototype.insert = function (data) {
     return this.client.insert(data);
+  };
+
+  ClarifyApiNode.prototype.dataFrame = async function (data) {
+    let payload = await this.client.dataFrame(data);
+    return {
+      included: payload.included ?? [],
+      data: new DataFrameResponse(payload.data),
+    };
+  };
+
+  ClarifyApiNode.prototype.evaluate = async function (data) {
+    let payload = await this.client.evaluate(data);
+    return {
+      included: payload.included ?? [],
+      data: new DataFrameResponse(payload.data),
+      meta: payload.meta,
+    };
   };
 
   RED.httpAdmin.post('/validateToken', async function (request, response) {

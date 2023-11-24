@@ -38,17 +38,19 @@
     "version": ">=2.0.0",
     "nodes": {
       "clarify_api": "nodes/clarify_api.js",
-      "clarify_insert": "nodes/clarify_insert.js"
+      "clarify_insert": "nodes/clarify_insert.js",
+      "clarify_data_frame": "nodes/clarify_data_frame.js",
+      "clarify_evaluate": "nodes/clarify_evaluate.js"
     }
   },
   "dependencies": {
-    "@clarify/api": "~0.3.0",
+    "@clarify/api": "~0.4.0",
     "joi": "^17.6.0",
     "lowdb": "^1.0.0",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "@clarify/api-test-support": "0.3.0",
+    "@clarify/api-test-support": "0.4.0",
     "@sinonjs/fake-timers": "^9.1.1",
     "@types/node-fetch": "^2.6.1",
     "@types/sinon": "^10.0.11",
