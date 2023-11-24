@@ -194,19 +194,19 @@ module.exports = function (RED) {
   };
 
   ClarifyInsertNode.prototype.flushSaveSignalBuffer = async function (signals) {
-    let inputs = {};
+    let signalsByInput = {};
     for (let signal of signals) {
-      inputs[signal.inputId] = signal.signal;
+      signalsByInput[signal.inputId] = signal.signal;
     }
 
     try {
       let response = await this.api.saveSignals({
         createOnly: false,
-        inputs: inputs,
+        signalsByInput,
       });
 
       for (let inputId of Object.keys(response.signalsByInput)) {
-        let signal = inputs[inputId];
+        let signal = signalsByInput[inputId];
         this.api.database.saveSignal(inputId, hashSignal(signal));
       }
 
@@ -219,7 +219,7 @@ module.exports = function (RED) {
         `Failed saving ${signals.length} ${signals.length === 1 ? 'signal' : 'signals'}`,
       );
       this.error(message, {
-        payload: inputs,
+        payload: signalsByInput,
       });
     }
   };

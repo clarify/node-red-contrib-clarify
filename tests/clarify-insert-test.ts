@@ -192,7 +192,7 @@ describe('clarify-insert', () => {
           saveRequest.calledWithExactly({
             createOnly: false,
             integration: CLARIFY_CREDENTIALS.integration,
-            inputs: {
+            signalsByInput: {
               'clarify-input-id-01': {
                 name: 'Input id#01',
               },

@@ -6,7 +6,6 @@ const timePattern = `T(${numbers}H)?(${numbers}M)?(${numbers}S)?`;
 const duration = new RegExp(`^P(?:${datePattern}(?:${timePattern})?)$`);
 
 /** @type Joi.ObjectSchema<{
- *   groupIncludedByType: boolean,
  *   include: ['item'],
  *   query: {
  *     sort: string[],
@@ -39,11 +38,18 @@ const DataFrameRequestValidator = Joi.object({
         $lt: Joi.alternatives().try(Joi.date().iso().cast('string'), Joi.date().timestamp().cast('string')),
       }).required(),
     }).required(),
+    timeZone: Joi.string(),
+    firstDayOfWeek: Joi.number(),
+    outsidePoints: Joi.boolean(),
     rollup: Joi.string().regex(duration),
+    origin: Joi.alternatives().try(Joi.date().iso().cast('string'), Joi.date().timestamp().cast('string')),
     last: Joi.number(),
   }).required(),
   include: Joi.array().items('item'),
-  groupIncludedByType: Joi.boolean(),
+  format: Joi.object({
+    dataAsArray: Joi.boolean(),
+    groupIncludedByType: Joi.boolean(),
+  }),
 });
 
 const EvaluateValidator = Joi.object({
@@ -92,7 +98,10 @@ const EvaluateValidator = Joi.object({
     last: Joi.number(),
   }).required(),
   include: Joi.array().items('item'),
-  groupIncludedByType: Joi.boolean(),
+  format: Joi.object({
+    dataAsArray: Joi.boolean(),
+    groupIncludedByType: Joi.boolean(),
+  }),
 });
 
 module.exports = {DataFrameRequestValidator, EvaluateValidator};
